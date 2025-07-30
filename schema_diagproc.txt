@@ -1,0 +1,56 @@
+# [테이블: DIAGNOSES_ICD, D_ICD_DIAGNOSES, PROCEDURES_ICD, D_ICD_PROCEDURES, D_HCPCS, HCPCSEVENTS]
+
+DIAGNOSES_ICD
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+SEQ_NUM | 진단순서
+ICD_CODE | 진단코드
+ICD_VERSION | 코드버전
+
+D_ICD_DIAGNOSES
+ICD_CODE | ICD진단코드
+ICD_VERSION | ICD코드버전
+LONG_TITLE | 진단명상세
+
+PROCEDURES_ICD
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+SEQ_NUM | 순번
+CHARTDATE | 시술일자
+ICD_CODE | 시술코드
+ICD_VERSION | 코드버전
+
+D_ICD_PROCEDURES
+ICD_CODE | ICD시술코드
+ICD_VERSION | ICD코드버전
+LONG_TITLE | 시술명상세
+
+D_HCPCS
+CODE | HCPCS코드
+CATEGORY | 코드카테고리
+LONG_DESCRIPTION | 상세설명
+SHORT_DESCRIPTION | 간략설명
+
+HCPCSEVENTS
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+CHARTDATE | 기록일
+HCPCS_CD | HCPCS코드
+SEQ_NUM | 시퀀스
+SHORT_DESCRIPTION | 간략설명
+
+# [FAQ]
+Q: 패혈증 환자 명단
+A: SELECT DISTINCT d.subject_id FROM diagnoses_icd d JOIN d_icd_diagnoses dd ON d.icd_code = dd.icd_code AND d.icd_version = dd.icd_version WHERE LOWER(dd.long_title) LIKE '%sepsis%'
+
+Q: 2%년 기관삽관(intubation) 시행 환자
+A: SELECT DISTINCT p.subject_id FROM procedures_icd p JOIN d_icd_procedures d ON p.icd_code = d.icd_code AND p.icd_version = d.icd_version WHERE LOWER(d.long_title) LIKE '%intubation%' AND TO_CHAR(p.chartdate, 'YYYY') LIKE '2%'
+
+# [유의어]
+"패혈증", "sepsis" → d_icd_diagnoses.long_title LIKE '%sepsis%'
+"고혈압", "hypertension", "htn" → d_icd_diagnoses.long_title LIKE '%hypertension%' OR LIKE '%htn%'
+"기관삽관", "intubation" → d_icd_procedures.long_title LIKE '%intubation%'
+
+# [활용팁]
+진단/시술명 조건은 반드시 d_icd_*와 조인
+코드버전(ICD_VERSION) 활용 필요

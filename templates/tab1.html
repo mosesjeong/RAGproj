@@ -1,0 +1,219 @@
+<div id="ecrf-wrap" style="display: flex; height: 100%; font-family: 'Noto Sans KR', sans-serif;">
+  <aside style="width: 240px; background: #f8f9fa; border-right: 1.5px solid #dee2e6; padding: 20px 0;">
+    <nav style="display: flex; flex-direction: column; gap: 8px;">
+      <button class="ecrf-tab-btn active" data-tab="tab-patient-info">환자 기본 정보</button>
+      <button class="ecrf-tab-btn" data-tab="tab-outpatient">외래 진료 기록</button>
+      <button class="ecrf-tab-btn" data-tab="tab-results">검사 결과 모아보기</button>
+      <button class="ecrf-tab-btn" data-tab="tab-surgery-history">수술/시술 이력</button>
+      <button class="ecrf-tab-btn" data-tab="tab-medication">처방약 관리</button>
+      <button class="ecrf-tab-btn" data-tab="tab-screening">건강검진 이력</button>
+    </nav>
+  </aside>
+
+  <main style="flex: 1; padding: 32px; overflow-y: auto; background: #fff;">
+    <section id="tab-patient-info" class="ecrf-tab-content active">
+      <h2>환자 기본 정보</h2>
+      <table class="ecrf-form-table">
+        <tr><td>환자 등록번호</td><td><input type="text" value="P20210089" readonly /></td></tr>
+        <tr><td>성명</td><td><input type="text" value="김철수" /></td></tr>
+        <tr><td>생년월일</td><td><input type="text" value="1968-05-12 (만 57세)" readonly /></td></tr>
+        <tr><td>성별</td><td class="ecrf-radio-group"><label><input type="radio" name="gender" checked/> 남</label> <label><input type="radio" name="gender" /> 여</label></td></tr>
+        <tr><td>혈액형</td><td><input type="text" value="O+ (Rh+)" /></td></tr>
+        <tr><td>연락처</td><td><input type="text" value="010-9876-5432" /></td></tr>
+        <tr><td>주소</td><td><input type="text" value="경기도 성남시 분당구 정자동" /></td></tr>
+        <tr><td>주요 진단명</td><td><input type="text" value="제2형 당뇨병 (E11), 본태성 고혈압 (I10), 고지혈증 (E78)" /></td></tr>
+        <tr><td>과거력/기저질환</td><td><textarea rows="4">2015년: 본태성 고혈압(I10) 진단
+2018년: 제2형 당뇨병(E11), 고지혈증(E78) 진단
+2020년: 위식도 역류질환(K21) 진단
+2022년: 우측 어깨 회전근개 파열</textarea></td></tr>
+        <tr><td>알레르기/부작용</td><td><textarea>NSAIDs (비스테로이드성 소염진통제) 복용 시 속쓰림 증상 심해짐</textarea></td></tr>
+        <tr><td>사회력</td><td><textarea rows="3">흡연: 20년 전 중단 (과거 10 pack-year)
+음주: 주 2회, 소주 1병/회</textarea></td></tr>
+        <tr><td>가족력</td><td><textarea>부: 뇌졸중 (65세 사망)
+모: 당뇨, 고혈압</textarea></td></tr>
+      </table>
+      <button class="ecrf-save-btn">저장</button>
+    </section>
+
+    <section id="tab-outpatient" class="ecrf-tab-content">
+      <h2>외래 진료 기록</h2>
+
+      <div class="visit-record">
+        <h3>방문일: 2025-07-15 (순환기내과 / 이하늘 교수)</h3>
+        <table class="ecrf-form-table">
+            <tr><td>주증상 (S)</td><td><textarea readonly>정기 처방 위해 내원. 최근 1달 간 간헐적인 손발 저림 증상 있음. 체중 2kg 증가.</textarea></td></tr>
+            <tr><td>진찰소견 (O)</td><td><textarea readonly>BP 135/85 mmHg, PR 76 bpm. 양쪽 발등 감각 저하 소견 지속. HbA1c 7.5%, LDL 110 mg/dL로 조절 미흡.</textarea></td></tr>
+            <tr><td>평가 (A)</td><td><textarea readonly>1. 조절되지 않는 제2형 당뇨 및 고지혈증. 2. 당뇨병성 말초신경병증 의심. 3. 고혈압은 약물로 조절 중.</textarea></td></tr>
+            <tr><td>계획 (P)</td><td><textarea readonly>1. 약물 유지, 3개월 뒤 F/U. 2. Pregabalin 25mg 취침 전 투약 시작. 3. 영양 상담 통한 식단 교육 및 운동 권고. 4. 연 1회 안저/신경전도 검사 예정.</textarea></td></tr>
+        </table>
+      </div>
+
+       <div class="visit-record">
+        <h3>방문일: 2025-04-12 (순환기내과 / 이하늘 교수)</h3>
+        <table class="ecrf-form-table">
+            <tr><td>주증상 (S)</td><td><textarea readonly>3개월 정기 F/U. 특별한 증상 변화 없음.</textarea></td></tr>
+            <tr><td>진찰소견 (O)</td><td><textarea readonly>BP 130/80 mmHg, HbA1c 7.1%, LDL 98 mg/dL. 지난번보다 수치 개선됨.</textarea></td></tr>
+            <tr><td>계획 (P)</td><td><textarea readonly>약물 유지하며 경과 관찰.</textarea></td></tr>
+        </table>
+      </div>
+       <button class="ecrf-save-btn">새 기록 추가</button>
+    </section>
+
+    <section id="tab-results" class="ecrf-tab-content">
+        <h2>검사 결과 모아보기</h2>
+
+        <h3>주요 혈액 검사 추이</h3>
+        <table class="ecrf-lab-table">
+            <thead><tr><th>검사항목</th><th>2024-07-10</th><th>2025-01-15</th><th>2025-07-15</th><th>정상범위</th></tr></thead>
+            <tbody>
+                <tr><td>HbA1c (%)</td><td>7.8</td><td>7.1</td><td><b style="color:red;">7.5</b></td><td>4.0-6.0</td></tr>
+                <tr><td>공복혈당 (mg/dL)</td><td>165</td><td>130</td><td><b style="color:red;">145</b></td><td>70-99</td></tr>
+                <tr><td>LDL 콜레스테롤 (mg/dL)</td><td>135</td><td>98</td><td><b style="color:red;">110</b></td><td>&lt; 100</td></tr>
+                <tr><td>크레아티닌 (mg/dL)</td><td>1.0</td><td>1.1</td><td>1.1</td><td>0.6-1.2</td></tr>
+            </tbody>
+        </table>
+
+        <h3>영상/기타 검사</h3>
+        <table class="ecrf-lab-table">
+            <thead><tr><th>검사명</th><th>시행일</th><th>결과 요약</th></tr></thead>
+            <tbody>
+                 <tr>
+                    <td>신경전도 검사 (NCV)</td>
+                    <td>2025-07-20</td>
+                    <td><input type="text" value="양쪽 하지의 감각신경 전도 속도 저하, 당뇨병성 말초신경병증에 합당한 소견."/></td>
+                </tr>
+                <tr>
+                    <td>경동맥 초음파</td>
+                    <td>2025-01-20</td>
+                    <td><input type="text" value="양측 경동맥 내중막 두께 증가 (IMT 1.1mm). 경화반(plaque)은 없음."/></td>
+                </tr>
+                 <tr>
+                    <td>안저 검사</td>
+                    <td>2024-11-02</td>
+                    <td><input type="text" value="경도의 비증식성 당뇨망막병증 (Mild NPDR)"/></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="ecrf-save-btn">저장</button>
+    </section>
+
+    <section id="tab-surgery-history" class="ecrf-tab-content">
+      <h2>수술/시술 이력</h2>
+        <table class="ecrf-lab-table">
+            <thead><tr><th>시술/수술명</th><th>시행일</th><th>의료기관</th><th>결과 및 특이사항</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" value="위 내시경 및 용종절제술"/></td>
+                    <td><input type="date" value="2024-04-10"/></td>
+                    <td><input type="text" value="KMI 한국의학연구소"/></td>
+                    <td><input type="text" value="위저부 0.3cm 선종성 용종 절제. 만성 표재성 위염 관찰됨."/></td>
+                </tr>
+                 <tr>
+                    <td><input type="text" value="관절경하 우측 어깨 회전근개 봉합술"/></td>
+                    <td><input type="date" value="2022-10-05"/></td>
+                    <td><input type="text" value="힘찬병원"/></td>
+                    <td><input type="text" value="수술 후 6개월간 재활치료. 현재 일상생활 문제 없음."/></td>
+                </tr>
+                <tr>
+                    <td><input type="text" value="백내장 수술 (우안)"/></td>
+                    <td><input type="date" value="2021-02-15"/></td>
+                    <td><input type="text" value="강남밝은안과"/></td>
+                    <td><input type="text" value="인공수정체 삽입. 경과 양호."/></td>
+                </tr>
+            </tbody>
+        </table>
+      <button class="ecrf-save-btn">이력 추가 및 저장</button>
+    </section>
+
+    <section id="tab-medication" class="ecrf-tab-content">
+        <h2>처방약 관리</h2>
+        <h3>현재 복용약</h3>
+        <table class="ecrf-lab-table">
+            <thead><tr><th>약품 성분명</th><th>용법</th><th>용도</th><th>처방 시작일</th></tr></thead>
+            <tbody>
+                <tr><td>Losartan 50mg</td><td>1일 1회 아침</td><td>고혈압</td><td>2020-01-10</td></tr>
+                <tr><td>Metformin XR 500mg</td><td>1일 2회 아침, 저녁</td><td>당뇨</td><td>2018-07-22</td></tr>
+                <tr><td>Atorvastatin 10mg</td><td>1일 1회 저녁</td><td>고지혈증</td><td>2018-07-22</td></tr>
+                <tr><td>Aspirin Protect 100mg</td><td>1일 1회 점심</td><td>혈전예방</td><td>2020-01-10</td></tr>
+                <tr><td>Pregabalin 25mg</td><td>1일 1회 취침 전</td><td>신경병증 통증</td><td>2025-07-15</td></tr>
+            </tbody>
+        </table>
+        <h3>과거 복용약 (최근 5년)</h3>
+        <table class="ecrf-lab-table">
+             <thead><tr><th>약품 성분명</th><th>용법</th><th>용도</th><th>중단 사유</th></tr></thead>
+             <tbody>
+                <tr><td>Amlodipine 5mg</td><td>1일 1회</td><td>고혈압</td><td>발목 부종 부작용으로 Losartan으로 변경 (2020-01-09)</td></tr>
+             </tbody>
+        </table>
+        <button class="ecrf-save-btn">처방 정보 저장</button>
+    </section>
+
+    <section id="tab-screening" class="ecrf-tab-content">
+      <h2>건강검진 이력 (2024년 국가검진)</h2>
+      <table class="ecrf-form-table">
+        <tr><td>검진일</td><td><input type="date" value="2024-04-10" readonly/></td></tr>
+        <tr><td>검진 기관</td><td><input type="text" value="KMI 한국의학연구소" readonly/></td></tr>
+        <tr><td>신체 계측</td><td><input type="text" value="키 172cm, 체중 82kg, BMI 27.7(비만), 허리둘레 92cm(복부비만)" readonly/></td></tr>
+        <tr><td>혈압</td><td><input type="text" value="138 / 88 mmHg (고혈압 전단계)" readonly/></td></tr>
+        <tr><td>위 내시경</td><td><input type="text" value="만성 표재성 위염, 위저부 선종성 용종(제거 완료)" readonly/></td></tr>
+        <tr><td>골밀도 (T-score)</td><td><input type="text" value="-1.5 (골감소증)" readonly/></td></tr>
+        <tr><td>종합 소견</td><td><textarea readonly rows="5">
+- 기존에 진단된 제2형 당뇨, 고혈압, 고지혈증에 대한 적극적인 관리 및 약물 치료 지속이 필수적임.
+- 비만 및 복부비만 상태로, 심뇌혈관질환 위험도가 높음. 5% 이상 체중 감량 목표 설정 필요.
+- 골감소증 소견 있어 칼슘 및 비타민D 섭취 권장, 낙상 주의.
+- 당뇨 합병증(망막, 신경, 신장)에 대한 정기적인 추적 관찰 요망.
+        </textarea></td></tr>
+      </table>
+      <button class="ecrf-save-btn">저장</button>
+    </section>
+  </main>
+</div>
+
+<style>
+    .ecrf-tab-btn { background: none; border: none; text-align: left; padding: 12px 24px; font-size: 1.06em; cursor: pointer; color: #343A40; transition: background 0.2s; }
+    .ecrf-tab-btn:hover { background: #e9ecef; color: #3A86FF; font-weight: 600; }
+    .ecrf-tab-btn.active { background-color: #E0EDFF; color: #3A86FF; font-weight: 700; border-left: 4px solid #3A86FF; padding-left: 20px; }
+    .ecrf-tab-content { display: none; }
+    .ecrf-tab-content.active { display: block; }
+    .ecrf-tab-content input, .ecrf-tab-content select, .ecrf-tab-content textarea { width: 100%; padding: 8px 12px; font-size: 1em; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; background-color: #fff; }
+    .ecrf-tab-content textarea[readonly], .ecrf-tab-content input[readonly] { background-color: #f8f9fa; color: #495057; }
+    .ecrf-form-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-bottom: 20px; }
+    .ecrf-form-table td { padding: 4px 12px; vertical-align: middle; font-size: 0.98em; color: #212529; }
+    .ecrf-form-table td:first-child { width: 120px; font-weight: 600; color: #495057; text-align: right; padding-right: 18px; }
+    .ecrf-radio-group label { display: inline-flex; align-items: center; margin-right: 24px; font-weight: 500; color: #343A40; font-size: 0.97em; }
+    .ecrf-lab-table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 30px; font-size: 0.95em; }
+    .ecrf-lab-table th { background: #f1f3f5; font-weight: bold; color: #495057; }
+    .ecrf-lab-table th, .ecrf-lab-table td { border: 1px solid #dee2e6; padding: 10px; text-align: center; vertical-align: middle; }
+    .ecrf-save-btn { display: block; margin-left: auto; margin-top: 20px; background: #3A86FF; color: white; padding: 10px 20px; border: none; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 1.05em; }
+    .ecrf-save-btn:hover { background: #0056b3; }
+    h2 { margin-bottom: 24px; color: #343A40; border-bottom: 2px solid #DEE2E6; padding-bottom: 10px; }
+    h3 { margin-top: 30px; margin-bottom: 10px; color: #3A86FF; font-size: 1.2em; border-left: 4px solid #3A86FF; padding-left: 10px; }
+    .visit-record { border: 1px solid #e9ecef; border-radius: 8px; padding: 5px 15px 15px; margin-bottom: 20px; }
+    .visit-record h3 { border: none; padding: 0; margin: 15px 0 15px; font-size: 1.1em; color:#212529; font-weight: 600; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ecrfWrapper = document.getElementById('ecrf-wrap');
+    if (!ecrfWrapper || ecrfWrapper.dataset.initialized === 'true') return;
+    ecrfWrapper.dataset.initialized = 'true';
+
+    const tabButtons = ecrfWrapper.querySelectorAll('.ecrf-tab-btn');
+    const tabContents = ecrfWrapper.querySelectorAll('.ecrf-tab-content');
+
+    const handleTabClick = (btn) => {
+        tabButtons.forEach(button => button.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+
+        btn.classList.add('active');
+        const targetTab = ecrfWrapper.querySelector('#' + btn.dataset.tab);
+        if (targetTab) {
+            targetTab.classList.add('active');
+        }
+    };
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => handleTabClick(btn));
+    });
+});
+</script>

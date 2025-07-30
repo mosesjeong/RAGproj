@@ -1,0 +1,2256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>7조 화이팅</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* === 기존 스타일 유지 === */
+body {
+  margin:0; padding:0; background:#F8F9FA; min-height:100%; font-family:'Inter', 'Noto Sans KR', 'Segoe UI', Arial, sans-serif; scrollbar-color: #007BFF #FFFFFF;
+}
+
+#main-header-logo {
+  max-width: 200px;
+  width: 80vw;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+#main-header-left {
+  font-size:1.08em; color:#3A86FF; letter-spacing:0.02em; font-weight:500;
+}
+#main-header-center {
+  font-size:2.12em;
+  font-family:'Inter', sans-serif;
+  color:#3A86FF;
+  letter-spacing:0.13em;
+  font-weight:600;
+}
+#main-header-right {
+  font-size:1.04em; color:#3A86FF; letter-spacing:0.02em; font-weight:400;
+}
+#main-content-wrap {
+  display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:68vh; margin-top:10px;
+}
+
+#gptify-action-bar {
+  position:fixed; right:32px; bottom:32px; z-index:1002; display:none; gap:30px; align-items:center;
+  background: none; border: none; box-shadow: none;
+}
+#gptify-widget-btn {
+  position:static;
+  background:#3A86FF;
+  color:#fff;
+  border-radius:14px;
+  font-size:1.3em;
+  font-weight:bold;
+  cursor:pointer;
+  border:none;
+  display:flex;
+  align-items:center;
+  padding:0.6em 1.4em;
+  box-shadow:0 2px 8px #3A86FF22;
+  transition: background 0.17s, color 0.13s, box-shadow 0.13s;
+}
+#gptify-widget-btn:hover {
+  background: #0069D9;
+  color: #fff;
+  box-shadow: 0 6px 20px #3A86FF22;
+}
+#gptify-widget-btn img { display:none; }
+#login-btn {
+  background:#fff;
+  color:#3A86FF;
+  font-size:1.08em;
+  font-weight:600;
+  padding:0.6em 1.4em;
+  border-radius:14px;
+  border:1.5px solid #3A86FF;
+  cursor:pointer;
+  box-shadow:0 2px 8px #3A86FF22;
+  transition: background 0.15s, color 0.13s, border-color 0.15s, box-shadow 0.13s;
+}
+#login-btn:hover {
+  background: #F8F9FA;
+  color: #0056b3;
+  border-color: #0069D9;
+  box-shadow: 0 4px 18px #3A86FF10;
+}
+#gptify-chatbot-popup {
+  display:none; position:fixed; right:32px; bottom:90px; z-index:1003;
+  max-width:420px; width:97vw; height:90vh;
+  background:#FFFFFF;
+  border-radius:14px;
+  border:1.5px solid #DEE2E6;
+  display:flex; flex-direction:column;
+  opacity:0; transform:translateY(50px) scale(0.96);
+  transition:opacity 0.23s,transform 0.23s;
+  box-shadow:0 6px 24px #00000014;
+}
+#gptify-chatbot-popup.show {display:flex; opacity:1; transform:translateY(0) scale(1);}
+#app-bar {
+  background:#3A86FF; color:#fff;
+  display:flex; align-items:center; height:54px;
+  border-radius:14px 14px 0 0;
+  font-size:1.14em; position:relative; padding:0 20px;
+  box-shadow:0 1.5px 8px #3A86FF15;
+  justify-content: space-between;
+}
+#gpt-pill { display:none; }
+#app-title {font-weight:700; letter-spacing:0.6px; color:#fff; font-size:1.08em;}
+#search-chat-btn, #clear-chat-btn, #show-result-panel-btn, #close-chat-btn {
+  background:none; border:none; color:#fff; font-size:1.08em;
+  font-weight:500; cursor:pointer; opacity:0.88;
+  margin-right:8px; letter-spacing:0.01em; padding:0 8px;
+}
+#search-chat-btn:hover, #clear-chat-btn:hover, #show-result-panel-btn:hover, #close-chat-btn:hover {opacity:1;}
+
+#close-chat-btn {margin-right:0; font-size:1.45em; position:static;}
+#main-inner {flex:1; display:flex; flex-direction:column; height:100%; padding:0; overflow:hidden;}
+#search-bar {padding:0.45em 1em 0.1em 1em; background:#FFFFFF; display:none;}
+#search-input {width:100%; border-radius:10px; border:1px solid #DEE2E6; font-size:1em; padding:0.6em 1em; margin-bottom:0.1em; background:#fff; box-sizing:border-box; color:#343A40;}
+#chat {flex:1 1 auto; overflow-y:auto; margin:1em 0 0 0; font-size:1em; scroll-behavior:smooth; display:flex; flex-direction:column; gap:0.7em; padding:0 1em 1.3em 1em;}
+.user, .bot {display: flex; flex-direction: row; align-items: flex-start; max-width: 95%; word-break: break-word; margin: 0;}
+.user {align-self: flex-end; flex-direction: row-reverse; justify-content: flex-end;}
+.bot {align-self: flex-start; flex-direction: row;}
+.avatar {width: 36px; height: 36px; border-radius: 50%; margin: 0 0.35em; object-fit: cover; background: #FFFFFF; border: 1.5px solid #F8F9FA;}
+.user .avatar { margin-left: 0.35em; margin-right: 0; }
+.bot .avatar  { margin-right: 0.35em; margin-left: 0; }
+.bubble-wrap { display: flex; flex-direction: column; align-items: flex-end; min-width: 0; }
+.user .bubble-wrap { align-items: flex-end; }
+.bot  .bubble-wrap { align-items: flex-start; }
+.bubble { padding:0.7em 1em; border-radius:12px; line-height:1.6; background:#F8F9FA; font-size:1em; white-space:pre-line; max-width:320px; word-break:break-word; display:inline-block; color:#343A40; border:1px solid #DEE2E6;}
+.bot .bubble { background:#E9ECEF; color:#343A40; font-weight:500; border:1.2px solid #DEE2E6;}
+.timestamp { font-size:0.78em; color:#6C757D; margin-top:3px; margin-bottom:1px; padding-left:6px; padding-right:6px; user-select:none; }
+.user .timestamp { text-align:right; }
+.bot  .timestamp { text-align:left; }
+.table-scroll {max-height:40vh; overflow-y:auto; border-radius:8px; border:1px solid #DEE2E6; margin-top:0.4em; background:#F8F9FA;}
+table {border-collapse:collapse; width:100%; font-size:1em; background:#FFFFFF;}
+th,td {border:none; border-bottom:1px solid #DEE2E6; padding:12px 8px; text-align:left; font-size:1em;}
+th {background:#F1F3F5; color:#343A40; font-weight:700; position:sticky; top:0; z-index:1; font-size:1.06em;}
+td {background:#fff; color:#343A40;}
+#input-bar {background:#FFFFFF; display:flex; gap:0.5em; align-items:center; padding:0.7em 0; border-radius:0 0 14px 14px; border-top:1.3px solid #DEE2E6; flex-shrink:0;}
+#input {flex:1; font-size:1em; border-radius:10px; border:1.2px solid #DEE2E6; padding:0.85em 1em; background:#F8F9FA; margin:0; box-sizing:border-box; outline:none; color:#343A40;}
+#input:focus {border-color:#3A86FF;}
+#send {font-size:1.03em; padding:0.7em 1.05em; border:none; background:#3A86FF; color:#fff; border-radius:10px; font-weight:bold; cursor:pointer;}
+#send:active {background:#0056b3;}
+#chart-ux-wrap {margin:15px 0 8px 0; background:#FFFFFF; border-radius:10px; padding:10px 12px 6px 12px; display:none;}
+#chart-container {width:100%; min-height:220px;}
+#chart-ux-controls {display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+#chart-ux-controls select,#chart-ux-controls input[type=range]{padding:2px 6px; border-radius:7px; border:1px solid #DEE2E6; color:#343A40;}
+#chart-ux-controls label{font-size:0.98em; color:#343A40; margin-right:4px;}
+#chart-ux-controls input[type=range]{width:80px;}
+#result-panel {
+  display:none;
+  position:fixed;
+  left:0;
+  right:470px;
+  bottom:5vh;
+  margin:0;
+  min-width:320px;
+  min-height:170px;
+  max-height:34vh;
+  background:#FFFFFF;
+  border-radius:14px;
+  border:1.5px solid #DEE2E6;
+  z-index:9999;
+  padding:32px 26px 28px 26px;
+  font-size:1.12em;
+  overflow-y:auto;
+  overflow-x:auto;
+  box-shadow:0 2px 12px #00000011;
+}
+#result-panel button,
+#result-panel .csv-btn,
+#result-panel #sql-toggle-btn {
+  background:#3A86FF;
+  color:#fff;
+  font-weight:600;
+  border:none;
+  border-radius:10px;
+  padding:0.7em 1.3em;
+  margin-bottom:8px;
+  font-size:1em;
+  cursor:pointer;
+  margin-right:8px;
+}
+#result-panel pre, #result-panel .sql-block {
+  background:#F8F9FA;
+  color:#343A40;
+  border-radius:8px;
+  padding:14px 18px;
+  font-size:1em;
+  margin-bottom:20px;
+  white-space:pre-wrap;
+  border:1.5px solid #FFFFFF;
+  line-height:1.5;
+}
+#result-panel th {
+  background:#F1F3F5;
+  color:#343A40;
+}
+#result-panel td {
+  background:#fff;
+  color:#343A40;
+}
+@media (max-width:900px) {
+  #result-panel {left:0;right:0;width:100vw;padding:10px;}
+}
+#result-panel table {min-width:600px;}
+
+@keyframes bannerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+::-webkit-scrollbar {
+  width: 12px;
+  background: #FFFFFF;
+}
+::-webkit-scrollbar-thumb {
+  background: #3A86FF;
+  border-radius: 8px;
+  border: 3px solid #FFFFFF;
+}
+::-webkit-scrollbar-track {
+  background: #FFFFFF;
+  border-radius: 8px;
+}
+body, #chat, #result-panel, .table-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #3A86FF #FFFFFF;
+}
+
+#login-box {
+  display: flex;
+  position: fixed;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  background: #F8F9FA;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  min-width: 400px;
+  min-height: 400px;
+  padding: 0;
+  flex-direction: column;
+  gap: 0;
+  align-items: center;
+  z-index: 9999;
+}
+
+#login-title {
+  font-size: 1.0em;
+  font-weight: 500;
+  color: #5A6268;
+  margin-bottom: 60px;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.login-label {
+  align-self: flex-start;
+  margin-bottom: 8px;
+  margin-left: 14px;
+  font-size: 1.0em;
+  font-family: 'Inter', sans-serif;
+  color: #5A6268;
+  letter-spacing: 0.02em;
+}
+
+.login-field-wrap {
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+#login-id, #login-pw {
+  width: 100%;
+  border: none;
+  border-bottom: 2px solid #CED4DA;
+  background: transparent;
+  padding: 18px 0px 8px 0px;
+  margin-bottom: 2px;
+  font-size: 1.5em;
+  color: #5A6268;
+  outline: none;
+  transition: border-bottom 0.2s;
+}
+#login-id:focus, #login-pw:focus {
+  border-bottom: 2px solid #5A6268;
+}
+
+#login-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 40px;
+}
+
+#login-action-btn {
+  width: 100%;
+  background: #3A86FF;
+  color: #fff;
+  border: none;
+  border-radius: 0;
+  padding: 26px 0;
+  font-size: 1.0em;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 0;
+  box-shadow: none;
+  transition: background 0.16s;
+  letter-spacing: 0.04em;
+}
+
+#login-action-btn:hover {
+  background: #0069D9;
+}
+
+#toggle-signup-btn {
+  width: 100%;
+  background: #E9ECEF;
+  color: #5A6268;
+  border: none;
+  border-radius: 0;
+  padding: 26px 0;
+  font-size: 1.0em;
+  font-weight: 400;
+  cursor: pointer;
+  margin-top: 0;
+  margin-bottom: 0;
+  box-shadow: none;
+  letter-spacing: 0.04em;
+}
+
+#toggle-signup-btn:hover {
+  background: #dee2e6;
+}
+
+#login-msg {
+  margin-top: 18px;
+  font-size: 1.05em;
+  color: #ca4036;
+  text-align: center;
+  min-height: 1.5em;
+}
+
+#login-close {
+  position: absolute;
+  right: 26px;
+  top: 18px;
+  font-size: 2.1em;
+  font-weight: normal;
+  color: #adb5bd;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.13s;
+  z-index: 1;
+}
+#login-close:hover { opacity: 1; }
+
+#main-logo-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+  margin-top: 30px;
+  height: auto;
+}
+#main-logo-img {
+  max-width: 200px;
+  width: 80vw;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+#chat-confirm {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid #DEE2E6;
+  padding: 1.4em 2em;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px #00000011;
+  color: #343A40;
+  display: none;
+}
+#chat-confirm-box {
+  min-width: 260px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+#chat-confirm-text {
+  font-size: 1.1em;
+  margin-bottom: 1em;
+}
+#chat-confirm-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.2em;
+}
+#chat-confirm-buttons button {
+  font-size: 1em;
+  padding: 0.6em 1.4em;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+#chat-confirm-yes {
+  background: #3A86FF;
+  color: #fff;
+}
+#chat-confirm-no {
+  background: #3A86FF;
+  color: #fff;
+}
+#chat-confirm-yes:hover, #chat-confirm-no:hover {
+  background: #0069D9;
+}
+#pwchange-form {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 8px 28px #00000011, 0 1.5px 7px #00000011;
+  padding: 30px 28px 24px 28px;
+  z-index: 3000;
+  min-width: 280px;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  border: 1.5px solid #DEE2E6;
+  animation: fadeInPop .21s cubic-bezier(.32,1.7,.54,.97);
+}
+
+#pwchange-form .popup-title {
+  font-size: 1.10em;
+  font-weight: bold;
+  color: #3A86FF;
+  margin-bottom: 2px;
+  text-align: left;
+  letter-spacing: 0.02em;
+}
+
+#pwchange-form .popup-desc {
+  font-size: 0.96em;
+  color: #6C757D;
+  margin-bottom: 10px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+#pwchange-form input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  padding: 13px 15px;
+  border-radius: 12px;
+  border: 1.4px solid #CED4DA;
+  background: #F8F9FA;
+  color: #343A40;
+  font-size: 1.09em;
+  letter-spacing: 0.03em;
+  transition: border-color .17s, box-shadow .17s;
+  box-shadow: 0 1.5px 7px #CED4DA10;
+}
+#pwchange-form input:focus {
+  outline: none;
+  border-color: #3A86FF;
+  box-shadow: 0 2px 9px #3A86FF34;
+}
+
+#pwchange-form .popup-btns {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+  margin-bottom: 0px;
+  justify-content: center;
+}
+
+#pwchange-submit {
+  flex: 1;
+  background: #3A86FF;
+  color: #fff;
+  border: none;
+  border-radius: 13px;
+  padding: 12px 0;
+  font-size: 1.06em;
+  font-weight: 600;
+  box-shadow: 0 2px 10px #3A86FF12;
+  cursor: pointer;
+  transition: background .14s;
+}
+#pwchange-submit:hover {
+  background: #0069D9;
+}
+
+#pwchange-cancel {
+  flex: 1;
+  background: #3A86FF;
+  color: #fff;
+  border: 1.5px solid #6C757D;
+  border-radius: 13px;
+  padding: 12px 0;
+  font-size: 1.06em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .14s, color .14s, border-color .15s;
+}
+#pwchange-cancel:hover {
+  background: #0069D9;
+}
+
+#pwchange-msg {
+  color: #ca4036;
+  font-size: 0.97em;
+  min-height: 1.4em;
+  text-align: center;
+  margin-top: 2px;
+}
+
+.menu-popup {
+  min-width: 190px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px #00000022, 0 2px 8px #00000011;
+  padding: 18px 0 14px 0;
+  border: 1.7px solid #DEE2E6;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.menu-label, #user-id-label {
+  font-size: 1.10em;
+  color: #343A40;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+  padding: 7px 0 10px 0;
+  border-bottom: 1.1px solid #F1F3F5;
+  letter-spacing: 0.02em;
+}
+#user-id-label {
+  font-size: 1.5em;
+  color: #3A86FF;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+  padding: 7px 0 10px 0;
+  border-bottom: 1.1px solid #DEE2E6;
+  letter-spacing: 0.02em;
+  background: #F8F9FA;
+  border-radius: 12px 12px 0 0;
+}
+.menu-btn {
+  background: #E9ECEF;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.07em;
+  color: #3A86FF;
+  font-weight: 600;
+  padding: 11px 0 10px 0;
+  margin: 4px 12px 0 12px;
+  transition: background 0.13s, color 0.13s;
+  cursor: pointer;
+  text-align: center;
+}
+.menu-btn:hover {
+  background: #3A86FF;
+  color: #fff;
+}
+.main-dashboard-box {
+  background: #FFFFFF;
+  border: 2px solid #3A86FF;
+  border-radius: 19px;
+  padding: 32px 22px 32px 22px;
+  color: #343A40;
+  box-shadow: 0 4px 24px #00000010;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-clip: padding-box;
+  /* min-height를 제거하여 그리드가 높이를 제어하도록 함 */
+  min-height: 0;
+}
+
+.board-head {
+  font-size: 1.23em;
+  font-weight: 700;
+  color: #343A40;
+  margin-bottom: 12px;
+  letter-spacing: 0.01em;
+  padding-left: 2px;
+}
+
+.board-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1.3px solid #3A86FF;
+  flex-grow: 1; /* 리스트가 남은 공간을 채우도록 함 */
+  overflow-y: auto; /* 내용이 많을 경우 스크롤 */
+}
+.board-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0 14px 0;
+  border-bottom: 1.3px solid #DEE2E6;
+  transition: background 0.13s, color 0.12s;
+  font-size: 1.11em;
+  background: none;
+}
+.board-list li:hover {
+  background: #E9ECEF;
+  color: #0056b3;
+}
+.label {
+  min-width: 46px;
+  padding: 2px 12px;
+  border-radius: 11px;
+  font-size: 1em;
+  font-weight: 600;
+  margin-right: 10px;
+  text-align: center;
+}
+.label-신약 { background: #28a745; color: #fff; }
+.label-ai { background: #17a2b8; color: #fff; }
+.label-모집 { background: #6f42c1; color: #fff; }
+.label-점검 { background: #fd7e14; color: #fff; }
+.label-업데이트 { background: #ffc107; color: #212529; border: 1.2px solid #e0a800; }
+
+.board-title {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: keep-all;
+  margin-right: 0;
+  line-height: 1.45em;
+  max-height: 2.8em;
+  color: #343A40;
+  flex-grow: 1; /* 제목이 가능한 공간을 차지하도록 */
+}
+.board-title:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.board-date {
+  min-width: 90px;
+  font-size: 0.96em;
+  color: #6C757D;
+  text-align: right;
+  padding-left: 8px;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+}
+
+.pagination {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0; /* 페이지네이션이 줄어들지 않도록 */
+}
+.page-num {
+  display: inline-block;
+  padding: 7px 16px;
+  border-radius: 10px;
+  font-size: 1em;
+  color: #3A86FF;
+  background: #E9ECEF;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.14s, color 0.13s;
+  text-decoration: none;
+}
+.page-num.active, .page-num:hover {
+  background: #3A86FF;
+  color: #fff;
+}
+
+.main-dashboard-calendar {
+  padding: 32px 22px;
+}
+
+.calendar-events-flex {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  align-items: flex-start;
+  height: 100%;
+}
+
+.calendar-widget {
+  width: auto;
+  height: 100%;
+  background: transparent !important;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  font-size: 1em;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-grow: 1;
+}
+
+.calendar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.14em;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 16px;
+  color: #3A86FF;
+  font-weight: bold;
+  padding: 0 10px;
+}
+.calendar-head button {
+  background: none;
+  border: none;
+  color: #6C757D;
+  font-size: 2.1em;
+  padding: 2px 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.14s, color 0.13s;
+  font-family: inherit;
+  font-weight: 600;
+}
+.calendar-head button:hover {
+  background: #E9ECEF;
+  color: #0056b3;
+}
+
+.calendar-table {
+  background: #fff;
+  border-collapse: collapse;
+  width: 100%;
+  height: 100%; /* 부모 높이를 채우도록 변경 */
+  margin: 0 auto;
+  table-layout: fixed;
+}
+.calendar-table th, .calendar-table td {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 1.13em;
+  font-weight: 400;
+  padding: 0;
+  background: #fff;
+  border: 1px solid #F1F3F5;
+  border-radius: 0 !important;
+  text-align: center;
+  vertical-align: top;
+  position: relative;
+  transition: background 0.12s;
+  box-sizing: border-box;
+}
+.calendar-table th {
+  color: #3A86FF;
+  font-weight: 700;
+  font-size: 1.07em;
+  padding-bottom: 5px;
+  letter-spacing: 0.04em;
+  background: #F8F9FA;
+}
+.calendar-table td {
+  font-size: 1.09em;
+  color: #495057;
+  font-weight: 600;
+  background: #fff;
+}
+.calendar-table td.today {
+  background: #D6E8FF !important;
+  color: #0056B3 !important;
+  font-weight: 700;
+  border-radius: 9px !important;
+}
+.calendar-table td:hover:not(:empty) {
+  background: #E9ECEF;
+  cursor: pointer;
+}
+.calendar-day-num {
+  font-size: 1em;
+  font-weight: 600;
+  margin-top: 5px;
+  margin-bottom: 0px;
+  min-height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  color: inherit;
+}
+.dots-wrap {
+  display: flex;
+  justify-content: center;
+  gap: 2.7px;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  min-height: 12px;
+}
+.cal-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-top: 0;
+}
+.cal-dot.visit { background: #28a745; }
+.cal-dot.med { background: #dc3545; }
+.cal-dot.etc { background: #6f42c1; }
+
+.calendar-side-list {
+  min-width: 280px;
+  width: 320px;
+  font-size: 1em;
+  margin-top: 0;
+  line-height: 1.35em;
+  margin-left: 0;
+  background: none;
+  color: #6C757D;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.events-title {
+  font-size: 1.10em;
+  font-weight: bold;
+  margin-bottom: 13px;
+  color: #343A40;
+}
+.events-ul {
+  font-size: 1em;
+  color: #343A40;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+.events-ul li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 1.02em;
+  line-height: 1.5em;
+  min-height: 18px;
+  word-break: keep-all;
+}
+.event-date-num {
+  font-size: 1.04em;
+  font-weight: bold;
+  color: #007BFF;
+  margin-right: 2px;
+  display: inline-block;
+  min-width: 36px;
+  text-align: right;
+  letter-spacing: 0.01em;
+}
+.event-date {
+  font-size: 0.99em;
+  margin-right: 2px;
+  color: #6C757D;
+}
+@media (max-width: 1400px) {
+  .calendar-widget {
+    width: 99vw;
+    min-width: 0;
+    height: auto;
+    padding: 18px 2vw 18px 2vw;
+  }
+  .calendar-side-list {
+    min-width: 0;
+    width: 99vw;
+    margin-left: 0;
+  }
+}
+
+.custom-cal-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: #343A40;
+  color: #fff;
+  border-radius: 12px;
+  padding: 15px 22px 13px 18px;
+  font-size: 1.11em;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 500;
+  min-width: 210px;
+  max-width: 340px;
+  line-height: 1.78em;
+  box-shadow: 0 8px 36px #0003, 0 1.5px 2px #00000016;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s cubic-bezier(.42,1.74,.87,.78), transform 0.2s;
+  white-space: pre-line;
+  border: 1.3px solid #6C757D;
+  transform: translateY(8px) scale(0.98);
+}
+.custom-cal-tooltip.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.menu-popup {
+  display: none;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px #00000014;
+  padding: 18px 22px 14px 22px;
+  border: 1.5px solid #DEE2E6;
+  gap: 10px;
+  flex-direction: column;
+  position: absolute;
+  top: 46px;
+  right: 0;
+  z-index: 2000;
+}
+#footer-policy {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #fff;
+  border-top: 1px solid #ddd0bc;
+  font-size: 0.9em;
+  color: #775E44;
+  z-index: 998;
+  padding: 10px 0;
+}
+.footer-policy-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.footer-policy-inner a {
+  color: #5b3d20;
+  text-decoration: none;
+  font-weight: 500;
+}
+.footer-policy-inner a:hover {
+  text-decoration: underline;
+}
+
+/* === 레이아웃 및 애니메이션 튜닝 섹션 === */
+html, body {
+    height: 100%;
+    overflow: hidden; /* 전체 페이지 스크롤 방지 */
+}
+body {
+    display: flex;
+    flex-direction: column; /* 헤더와 메인 앱을 수직으로 쌓음 */
+}
+/* 로그인 상태일 때만 헤더와 메인 앱을 보여주기 위한 기본값 */
+#main-header, #main-app {
+    display: none;
+}
+#main-app {
+    flex-grow: 1; /* 남은 수직 공간을 모두 차지 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 내부에서 스크롤 관리 */
+}
+.content-board {
+    display: none; /* 모든 콘텐츠 보드는 기본적으로 숨김 */
+    flex-grow: 1;
+    overflow-y: auto; /* 각 보드 내부에서 스크롤 가능하게 함 */
+    animation: dropIn 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+/* 드롭다운 애니메이션 */
+@keyframes dropIn {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+#main-header {
+    padding: 18px 0 0 0;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: relative;
+    z-index: 10;
+}
+#main-nav-bar {
+    border-bottom: 1.5px solid #DEE2E6;
+}
+.text-tab-btn {
+    background: none;
+    border: 1.5px solid transparent;
+    border-bottom: none; /* 하단 테두리 없음 */
+    border-radius: 12px 12px 0 0;
+    color: #004080;
+    font-weight: 600;
+    font-size: 1.3em;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    margin-bottom: -1.5px; /* 네비게이션 바 하단 테두리와 겹치게 함 */
+    position: relative;
+}
+.text-tab-btn:hover {
+  background-color: #F1F3F5;
+  color: #0056b3;
+}
+/* 활성화된 탭 스타일 */
+.text-tab-btn.active {
+    background-color: #F8F9FA; /* 콘텐츠 영역 배경색과 동일하게 */
+    border-color: #DEE2E6;
+    color: #3A86FF;
+}
+/* 콘텐츠 영역 래퍼 */
+#main-dashboard-wrap, #tab1-board, #tab2-board, #tab3-board {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    background: #F8F9FA;
+}
+
+/* === 대시보드 그리드 구조 (수정됨) === */
+#main-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 좌우 2개의 큰 열 */
+    grid-template-rows: 100%; /* 전체 높이를 채움 */
+    gap: 24px;
+    width: 100%;
+    max-width: 2200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 24px;
+    box-sizing: border-box;
+    max-height: 1400px;
+}
+.dashboard-column {
+    display: grid;
+    gap: 24px;
+    min-height: 0;
+}
+.dashboard-column-left {
+    grid-template-rows: 1fr 1fr; /* 왼쪽 열: 50% / 50% 비율 */
+}
+.dashboard-column-right {
+    grid-template-rows: 7.5fr 2.5fr;
+}
+
+/* 개별 콘텐츠 박스는 이제 그리드 아이템이 아님 */
+.main-dashboard-news, .main-dashboard-notice, .main-dashboard-calendar {
+    grid-column: auto;
+    grid-row: auto;
+}
+
+#main-dashboard-content {
+    width: 100%;
+    height: 100%;
+    padding: 24px;
+    box-sizing: border-box;
+}
+</style>
+</head>
+<body>
+  <div id="main-header">
+    <nav id="main-nav-bar" style="
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1920px;
+      margin: 0 auto;
+      padding: 0 24px;
+      box-sizing: border-box;
+      ">
+      <div class="nav-left" style="flex: 1 1 0; display: flex; gap: 300px;">
+        <button class="text-tab-btn" id="tab-1">Clinical Management</button>
+        <button class="text-tab-btn" id="tab-2">by moseee</button>
+      </div>
+      <div class="nav-center" style="flex: 0 0 auto; display: flex; justify-content: center; align-items: center;">
+        <img src="http://localhost:5001/static/logo2.png"
+             alt="GPTify Logo"
+             id="main-header-logo"
+             style="height: 40px; width: auto; object-fit: contain;" />
+      </div>
+      <div class="nav-right" style="flex: 1 1 0; display: flex; gap: 300px; align-items: center; justify-content: flex-end; position: relative;">
+        <button class="text-tab-btn" id="tab-3">Patient information input</button>
+        <button class="text-tab-btn" id="user-tab">User</button>
+        <div id="login-menu" class="menu-popup" style="display:none;">
+          <div id="user-id-label" class="menu-label"></div>
+          <button id="logout-btn" class="menu-btn">로그아웃</button>
+          <button id="show-pwchange-btn" class="menu-btn">비밀번호 변경</button>
+        </div>
+        <div id="pwchange-form" style="display: none;">
+          <div class="popup-title">비밀번호 변경</div>
+          <div class="popup-desc">보안을 위해 주기적으로 비밀번호를 변경하세요.</div>
+          <div class="pwchange-inputs">
+            <input type="password" id="old-pw" placeholder="기존 비밀번호">
+            <input type="password" id="new-pw" placeholder="새 비밀번호">
+            <input type="password" id="new-pw2" placeholder="새 비밀번호 확인">
+          </div>
+          <div class="popup-btns">
+            <button id="pwchange-submit">변경</button>
+            <button id="pwchange-cancel">취소</button>
+          </div>
+          <div id="pwchange-msg"></div>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <div id="main-app">
+    <div id="main-dashboard-wrap" class="content-board">
+        <div id="main-dashboard-grid">
+            <div class="dashboard-column dashboard-column-left">
+                <div class="main-dashboard-box main-dashboard-news">
+                    <div class="board-head">임상시험 소식</div>
+                    <ul class="board-list" id="news-list"></ul>
+                    <nav class="pagination" id="news-pagination"></nav>
+                </div>
+                <div class="main-dashboard-box main-dashboard-notice">
+                    <div class="board-head">공지사항</div>
+                    <ul class="board-list" id="notice-list"></ul>
+                    <nav class="pagination" id="notice-pagination"></nav>
+                </div>
+            </div>
+
+            <div class="dashboard-column dashboard-column-right">
+                <div class="main-dashboard-box main-dashboard-calendar">
+                    <div class="calendar-events-flex">
+                        <div class="calendar-widget">
+                            <div class="calendar-head">
+                                <button id="cal-prev">&lt;</button>
+                                <span id="calendar-month"></span>
+                                <button id="cal-next">&gt;</button>
+                            </div>
+                            <table class="calendar-table">
+                                <thead>
+                                    <tr>
+                                    <th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="calendar-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="calendar-side-list calendar-schedule-list">
+                            <div class="events-title">이번 달 일정</div>
+                            <ul class="events-ul" id="events-this-month"></ul>
+                            <div style="text-align: right; margin-top: 6px;">
+                                <button id="show-more-this-month" style="background: none; border: none; color: #3A86FF; font-weight: 600; font-size: 0.96em; cursor: pointer; text-decoration: underline;">더보기</button>
+                            </div>
+                            <div class="events-title" style="margin-top: 28px;">다음 달 일정</div>
+                            <ul class="events-ul" id="events-next-month"></ul>
+                            <div style="text-align: right; margin-top: 6px;">
+                                <button id="show-more-next-month" style="background: none; border: none; color: #3A86FF; font-weight: 600; font-size: 0.96em; cursor: pointer; text-decoration: underline;">더보기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="main-dashboard-box">
+                <!-- 연구/임상시험 요약 블록 -->
+                <div style="background: #ffffff; border: 1.5px solid #dee2e6; border-radius: 12px; padding: 20px 24px; height: 85%; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
+                  <div style="font-size: 18px; font-weight: 600; color: #343a40; margin-bottom: 16px;">최근 등록된 연구 과제</div>
+                  <div style="display: flex; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1;">
+                    <!-- 연구 카드 1 -->
+                    <div style="display: flex; flex-direction: column; border-bottom: 1px solid #e9ecef; padding-bottom: 8px;">
+                      <div style="font-weight: 500; font-size: 15px; color: #007BFF;">AI 기반 당뇨병 위험 예측 연구 <span style="font-size: 11px; background: #E6F0FF; color: #007BFF; padding: 2px 6px; border-radius: 6px; margin-left: 6px;">신규</span></div>
+                      <div style="font-size: 13px; color: #495057; margin-top: 2px;">책임자: 김현수 교수 | 대상자 32명 등록됨 | 마감일: 2025.08.15</div>
+                    </div>
+                    <!-- 연구 카드 2 -->
+                    <div style="display: flex; flex-direction: column; border-bottom: 1px solid #e9ecef; padding-bottom: 8px;">
+                      <div style="font-weight: 500; font-size: 15px; color: #20c997;">고혈압 약물 복용 후 인지기능 변화 분석 <span style="font-size: 11px; background: #FFF3CD; color: #856404; padding: 2px 6px; border-radius: 6px; margin-left: 6px;">마감 임박</span></div>
+                      <div style="font-size: 13px; color: #495057; margin-top: 2px;">책임자: 이정민 교수 | 대상자 58명 등록됨 | 마감일: 2025.07.30</div>
+                    </div>
+                    <!-- 연구 카드 3 -->
+                    <div style="display: flex; flex-direction: column; border-bottom: 1px solid #e9ecef; padding-bottom: 8px;">
+                      <div style="font-weight: 500; font-size: 15px; color: #212529;">COPD 환자 폐기능 예측 모델 개선 연구</div>
+                      <div style="font-size: 13px; color: #495057; margin-top: 2px;">책임자: 박지영 교수 | 대상자 17명 등록됨 | 마감일: 2025.09.10</div>
+                    </div>
+                    <!-- 연구 카드 4 -->
+                    <div style="display: flex; flex-direction: column; border-bottom: 1px solid #e9ecef; padding-bottom: 8px;">
+                      <div style="font-weight: 500; font-size: 15px; color: #212529;">항암치료 후 백혈구 회복 패턴 분석</div>
+                      <div style="font-size: 13px; color: #495057; margin-top: 2px;">책임자: 최윤아 교수 | 대상자 12명 등록됨 | 마감일: 2025.08.22</div>
+                    </div>
+                    <!-- 연구 카드 5 -->
+                    <div style="display: flex; flex-direction: column; border-bottom: 1px solid #e9ecef; padding-bottom: 8px;">
+                      <div style="font-weight: 500; font-size: 15px; color: #007BFF;">
+                        폐렴 환자 대상 항생제 내성 연구
+                        <span style="font-size: 11px; background: #E6F0FF; color: #007BFF; padding: 2px 6px; border-radius: 6px; margin-left: 6px;">신규</span>
+                      </div>
+                      <div style="font-size: 13px; color: #495057; margin-top: 2px;">
+                        책임자: 정세윤 교수 | 대상자 19명 등록됨 | 마감일: 2025.08.29
+                      </div>
+                    </div>
+
+                    <!-- 연구 카드 6 -->
+                    <div style="display: flex; flex-direction: column; border-bottom: 1px solid #e9ecef; padding-bottom: 8px;">
+                      <div style="font-weight: 500; font-size: 15px; color: #20c997;">
+                        불면증 환자 수면패턴 분석
+                        <span style="font-size: 11px; background: #FFF3CD; color: #856404; padding: 2px 6px; border-radius: 6px; margin-left: 6px;">마감 임박</span>
+                      </div>
+                      <div style="font-size: 13px; color: #495057; margin-top: 2px;">
+                        책임자: 윤하린 교수 | 대상자 45명 등록됨 | 마감일: 2025.07.28
+                      </div>
+                    </div>
+
+                    <!-- 연구 카드 7 -->
+                    <div style="display: flex; flex-direction: column; border-bottom: 1px solid #e9ecef; padding-bottom: 8px;">
+                      <div style="font-weight: 500; font-size: 15px; color: #212529;">
+                        전립선암 환자 생존율 예측 인공지능 모델
+                      </div>
+                      <div style="font-size: 13px; color: #495057; margin-top: 2px;">
+                        책임자: 김우진 교수 | 대상자 23명 등록됨 | 마감일: 2025.08.31
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- 자세히 보기 버튼 -->
+                  <div style="margin-top: 12px; display: flex; justify-content: flex-end;">
+                    <button style="background: #3A86FF; color: white; font-size: 13px; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer;">자세히 보기</button>
+                  </div>
+                </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="tab1-board" class="content-board">
+        <div id="main-dashboard-content"></div>
+    </div>
+    <div id="tab2-board" class="content-board">
+        <div id="main-dashboard-content"></div>
+    </div>
+    <div id="tab3-board" class="content-board">
+        <div id="main-dashboard-content"></div>
+    </div>
+  </div>
+
+  <div id="footer-policy">
+      <div class="footer-policy-inner">
+        <span>© 2025 GPTify</span>
+        <a href="#">정보</a>
+        <a href="#">웹접근성</a>
+        <a href="#">사용자약관</a>
+        <a href="#">개인정보 처리방침</a>
+        <a href="#">쿠키정책</a>
+        <a href="#">저작권정책</a>
+        <a href="#">비회원 설정</a>
+        <a href="#">커뮤니티정책</a>
+        <a href="#">언어</a>
+      </div>
+  </div>
+  <div id="main-logo-wrap">
+    <img src="http://localhost:5001/static/logo2.png" alt="GPTify Logo" id="main-logo-img">
+  </div>
+  <div id="gptify-action-bar">
+    <div id="gptify-widget-btn">GPTify</div>
+  </div>
+  <div id="gptify-chatbot-popup">
+    <div id="app-bar">
+      <div id="app-title">GPTify <span style="font-size:0.77em; font-weight:400; opacity:0.7"></span></div>
+      <div>
+        <button id="show-result-panel-btn">결과창</button>
+        <button id="search-chat-btn" title="채팅 내역 검색">검색</button>
+        <button id="clear-chat-btn" title="채팅 전체 삭제">삭제</button>
+        <button id="close-chat-btn" onclick="closeChatbot()">×</button>
+      </div>
+    </div>
+    <div id="main-inner">
+      <div id="search-bar">
+        <input id="search-input" type="text" placeholder="채팅 내역 검색(질문/답변)">
+      </div>
+      <div id="chat"></div>
+      <div id="input-bar">
+        <input id="input" placeholder="예) 65세 이상 환자 명단, 입원 건수, 월별 통계 등" />
+        <button id="send">전송</button>
+      <div id="chat-confirm" style="display:none;">
+      <div id="chat-confirm-box">
+        <div id="chat-confirm-text">채팅을 모두 삭제하시겠습니까?</div>
+        <div id="chat-confirm-buttons">
+          <button id="chat-confirm-yes">Yes</button>
+          <button id="chat-confirm-no">No</button>
+        </div>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+  <div id="chart-ux-wrap">
+    <div id="chart-ux-controls">
+      <label>x축 <select id="chart-x"></select></label>
+      <label>y축 <select id="chart-y"></select></label>
+      <label>차트 <select id="chart-type">
+        <option value="line">선</option>
+        <option value="bar">막대</option>
+        <option value="scatter">산점도</option>
+      </select></label>
+      <label>최소 <input id="chart-min" type="range" min="0" max="0" value="0"></label>
+      <label>최대 <input id="chart-max" type="range" min="0" max="0" value="0"></label>
+    </div>
+    <div id="chart-container">
+      <canvas id="resultChart"></canvas>
+    </div>
+  </div>
+  <div id="result-panel" style="display:none"></div>
+  <div id="login-box">
+    <div id="login-title">LOGIN</div>
+    <div class="login-field-wrap">
+      <div class="login-label">ID</div>
+      <input id="login-id" autocomplete="username" />
+    </div>
+    <div class="login-field-wrap">
+      <div class="login-label">PASSWORD</div>
+      <input id="login-pw" type="password" autocomplete="current-password" />
+    </div>
+    <div id="login-actions">
+      <button id="login-action-btn" onclick="handleLoginAction()">LOGIN</button>
+      <button id="toggle-signup-btn" onclick="toggleSignup()">SIGN UP</button>
+    </div>
+    <div id="login-msg"></div>
+  </div>
+  <div id="logout-confirm" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10001; background:#F8F9FA; border-radius:14px; box-shadow:0 4px 14px #00000011; border:1.5px solid #DEE2E6; min-width: 300px; padding:2em 2.4em;">
+    <div style="font-size:1.08em; color:#343A40; text-align:center; margin-bottom:2em;" id="logout-confirm-text"></div>
+    <div style="display:flex; justify-content:center; gap:2em;">
+      <button id="logout-yes" style="background:#3A86FF; color:#fff; border:none; border-radius:10px; padding:0.7em 1.4em; font-weight:600;">확인</button>
+      <button id="logout-no" style="background:#F8F9FA; color:#3A86FF; border:1.2px solid #3A86FF; border-radius:10px; padding:0.7em 1.4em; font-weight:600;">취소</button>
+    </div>
+  </div>
+<script>
+// === 기존 스크립트 대부분 유지 ===
+const popup = document.getElementById('gptify-chatbot-popup');
+const btn = document.getElementById('gptify-widget-btn');
+const chatDiv = document.getElementById('chat');
+const input = document.getElementById('input');
+const send = document.getElementById('send');
+const searchBtn = document.getElementById('search-chat-btn');
+const clearBtn = document.getElementById('clear-chat-btn');
+const closeBtn = document.getElementById('close-chat-btn');
+const searchBar = document.getElementById('search-bar');
+const searchInput = document.getElementById('search-input');
+const chartUX = document.getElementById('chart-ux-wrap');
+const chartXSel = document.getElementById('chart-x');
+const chartYSel = document.getElementById('chart-y');
+const chartTypeSel = document.getElementById('chart-type');
+const chartMin = document.getElementById('chart-min');
+const chartMax = document.getElementById('chart-max');
+const chartContainer = document.getElementById('chart-container');
+const chartCanvas = document.getElementById('resultChart');
+let chartObj = null, chartRows = [], chartCols = [];
+let chat_history = [], last_result = [], last_columns = [], last_user_msg = "";
+let last_sql = "", last_rows = [], last_cols = [];
+let sql_visible = true;
+const COLUMN_KR_MAP = {
+  SUBJECT_ID: '환자ID', HADM_ID: '입원ID', STAY_ID: 'ICU입원ID', GENDER: '성별', ANCHOR_AGE: '나이',
+  ANCHOR_YEAR: '기준연도', ANCHOR_YEAR_GROUP: '연도그룹', DOD: '사망일자', ADMITTIME: '입원일', DISCHTIME: '퇴원일',
+  DEATHTIME: '입원중사망일', ADMISSION_TYPE: '입원유형', ADMISSION_LOCATION: '입원위치', DISCHARGE_LOCATION: '퇴원위치',
+  INSURANCE: '보험유형', LANGUAGE: '언어', MARITAL_STATUS: '결혼상태', ETHNICITY: '인종', EDREGTIME: '응급실등록',
+  EDOUTTIME: '응급실퇴실', HOSPITAL_EXPIRE_FLAG: '입원중사망여부', CAREUNIT: '병동/ICU', INTIME: '입실', OUTTIME: '퇴실',
+  LOS: '재원기간', DRG_TYPE: 'DRG유형', DRG_CODE: 'DRG코드', DESCRIPTION: '설명', DRG_SEVERITY: 'DRG중증도',
+  DRG_MORTALITY: 'DRG사망률', CHARTDATE: '시술일자', ITEMID: '항목ID', LABEL: '항목명', VALUE: '값',
+  VALUENUM: '수치값', VALUEUOM: '단위', WARNING: '경고', FIRST_CAREUNIT: '최초ICU', LAST_CAREUNIT: '최종ICU',
+  CHARTTIME: '측정시각', STORETIME: '저장시각', ORDERID: '오더ID', LINKORDERID: '연결오더ID', STATUSDESCRIPTION: '상태설명',
+  ORDERCATEGORYNAME: '오더카테고리', PATIENTWEIGHT: '체중', TOTALAMOUNT: '총투여량', MICROEVENT_ID: '미생물검사ID',
+  TEST_NAME: '검사명', ORG_NAME: '미생물이름', QUANTITY: '수량', AB_NAME: '항생제', INTERPRETATION: '결과해석',
+  COMMENTS: '비고'
+};
+
+btn.onclick = () => {
+  if (popup.classList.contains('show')) {
+    popup.classList.remove('show');
+    setTimeout(() => (popup.style.display = 'none'), 230);
+  } else {
+    popup.style.display = 'flex';
+    setTimeout(() => popup.classList.add('show'), 20);
+    input.focus();
+  }
+};
+function closeChatbot() {
+  popup.classList.remove('show');
+  setTimeout(() => (popup.style.display = 'none'), 230);
+}
+function getCurrentTime() {
+  const now = new Date();
+  return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+function createCsvButton(result, columns) {
+  const btn = document.createElement('button');
+  btn.textContent = 'CSV 다운로드';
+  btn.style = `
+    background: #3A86FF;
+    color: #fff; font-size: 1.02em; padding: 0.7em 1.3em;
+    border-radius: 10px; border: none; font-weight: bold;
+    cursor: pointer;
+    margin-top: 0.4em; align-self: flex-start;
+  `;
+  btn.onmousedown = e => e.preventDefault();
+  btn.onclick = () => {
+    if (!result || !columns) return;
+    const kr_columns = columns.map(col => COLUMN_KR_MAP[col.toUpperCase()] || col);
+    let csv = kr_columns.join(',') + '\n';
+    for (const row of result) {
+      let line = [];
+      for (const col of columns) {
+        let v = row[col];
+        if (typeof v === 'string' && (v.includes(',') || v.includes('"') || v.includes('\n'))) {
+          v = '"' + v.replace(/"/g, '""') + '"';
+        }
+        line.push(v ?? '');
+      }
+      csv += line.join(',') + '\n';
+    }
+    const blob = new Blob([csv], { type: 'text/csv; charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'result.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+  return btn;
+}
+function isGraphRequested(msg) {
+  if (!msg) return false;
+  const kw = ["그래프","차트","plot","line chart","bar chart","그래프로","chart"];
+  msg = msg.toLowerCase();
+  return kw.some(k => msg.includes(k));
+}
+function updateChartUX(cols, rows) {
+  chartXSel.innerHTML = ""; chartYSel.innerHTML = "";
+  cols.forEach(col => {
+    let xopt = document.createElement('option');
+    xopt.value = col; xopt.textContent = COLUMN_KR_MAP[col.toUpperCase()]||col;
+    chartXSel.appendChild(xopt);
+    let yopt = document.createElement('option');
+    yopt.value = col; yopt.textContent = COLUMN_KR_MAP[col.toUpperCase()]||col;
+    chartYSel.appendChild(yopt);
+  });
+  chartYSel.selectedIndex = cols.findIndex(c => /valuenum|count|avg|mean|합|수|률/i.test(c)) || 1;
+  chartXSel.selectedIndex = 0;
+  let ykey = chartYSel.value;
+  let vals = rows.map(r => Number(r[ykey])).filter(v=>!isNaN(v));
+  let min = Math.min(...vals), max = Math.max(...vals);
+  chartMin.min = min; chartMin.max = max; chartMin.value = min;
+  chartMax.min = min; chartMax.max = max; chartMax.value = max;
+}
+function renderChart() {
+  let xkey = chartXSel.value, ykey = chartYSel.value, type = chartTypeSel.value;
+  let minv = Number(chartMin.value), maxv = Number(chartMax.value);
+  let x = [], y = [];
+  for (const row of chartRows) {
+    let v = Number(row[ykey]);
+    if (isNaN(v) || v < minv || v > maxv) continue;
+    x.push(row[xkey]);
+    y.push(v);
+  }
+  if (y.length < 2) {
+    chartContainer.style.display = "none";
+    if (chartObj) { chartObj.destroy(); chartObj = null; }
+    return;
+  }
+  if (chartObj) chartObj.destroy();
+  chartObj = new Chart(chartCanvas, {
+    type: type === 'scatter' ? 'scatter' : type,
+    data: type === 'scatter'
+      ? {datasets:[{label:ykey,data:x.map((v,i)=>({x:v,y:y[i]})),borderColor:'#3A86FF',backgroundColor:'#E9ECEF'}]}
+      : {labels:x,datasets:[{label:ykey,data:y,fill:false,borderColor:'#3A86FF',backgroundColor:'#E9ECEF',tension:0.18,pointRadius:4,pointHoverRadius:7,borderWidth:2}]},
+    options: {responsive:true,plugins:{legend:{display:true}},scales:{x:{ticks:{color:'#343A40'}},y:{beginAtZero:false,ticks:{color:'#343A40'}}}}
+  });
+  chartContainer.style.display = "";
+}
+function makeChartWithUX(cols, rows) {
+  chartCols = cols; chartRows = rows;
+  updateChartUX(cols, rows);
+  chartUX.style.display = "";
+  renderChart();
+}
+chartXSel.onchange = renderChart;
+chartYSel.onchange = renderChart;
+chartTypeSel.onchange = renderChart;
+chartMin.oninput = renderChart;
+chartMax.oninput = renderChart;
+
+function makeTableHtml(columns, rows) {
+  if (!rows || !columns || rows.length === 0) return '';
+  let html = '<div class="table-scroll"><table><thead><tr>';
+  for (const col of columns)
+    html += `<th>${COLUMN_KR_MAP[col.toUpperCase()] || col}</th>`;
+  html += '</tr></thead><tbody>';
+  for (const row of rows) {
+    html += '<tr>';
+    for (const col of columns) html += `<td>${row[col] ?? ''}</td>`;
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+  return html;
+}
+
+function renderResultPanel(sql, columns, rows) {
+  const panel = document.getElementById('result-panel');
+  panel.innerHTML = '';
+  const btnDiv = document.createElement('div');
+  btnDiv.style = "margin-bottom:18px;";
+  const toggleBtn = document.createElement('button');
+  toggleBtn.id = 'sql-toggle-btn';
+  toggleBtn.textContent = sql_visible ? 'Hide  SQL' : 'Show  SQL';
+  toggleBtn.style = "background:#3A86FF;color:#fff;padding:7px 19px;border-radius:10px;border:none;font-weight:600;font-size:1.5em;cursor:pointer;margin-bottom:0.3em;";
+  toggleBtn.onclick = function() {
+    sql_visible = !sql_visible;
+    renderResultPanel(sql, columns, rows);
+  };
+  btnDiv.appendChild(toggleBtn);
+  panel.appendChild(btnDiv);
+  let sqlDiv = document.createElement('div');
+  sqlDiv.id = 'sql-block';
+  sqlDiv.style = sql_visible ? "" : "display:none;";
+  if (sql && sql.trim()) {
+    const sqlBox = document.createElement('pre');
+    sqlBox.textContent = sql;
+    sqlBox.style = 'background:#F8F9FA;border-radius:8px;padding:14px 18px;color:#343A40;font-size:1em;margin-bottom:20px;white-space:pre-wrap;border:1.5px solid #FFFFFF;line-height:1.5;overflow-x:auto;';
+    sqlDiv.appendChild(sqlBox);
+  }
+  panel.appendChild(sqlDiv);
+  let tblDiv = document.createElement('div');
+  if (rows && columns && rows.length > 0) {
+    let html = '<div style="overflow-x:auto"><table><thead><tr>';
+    for (const col of columns)
+      html += `<th>${COLUMN_KR_MAP[col.toUpperCase()]||col}</th>`;
+    html += '</tr></thead><tbody>';
+    for (const row of rows.slice(0, 200)) {
+      html += '<tr>';
+      for (const col of columns)
+        html += `<td>${row[col] ?? ''}</td>`;
+      html += '</tr>';
+    }
+    html += '</tbody></table></div>';
+    tblDiv.innerHTML = html;
+  } else {
+    tblDiv.innerHTML = `<div style="color:#aaa;padding:24px 0 0 2px;">조회 결과가 없습니다.</div>`;
+  }
+  panel.appendChild(tblDiv);
+  if (rows && columns && rows.length > 0) {
+    const csvBtn = createCsvButton(rows, columns);
+    panel.appendChild(csvBtn);
+  }
+}
+
+function appendMessage(who, text, tableHtml, dataResult, dataColumns, userMsg) {
+  const div = document.createElement('div');
+  div.className = who;
+  const avatar = document.createElement('img');
+  avatar.className = 'avatar';
+  if (who === 'bot') {
+    avatar.src = 'http://localhost:5001/static/bot.png';
+    avatar.alt = 'GPT';
+    div.appendChild(avatar);
+  }
+  const bubbleWrap = document.createElement('div');
+  bubbleWrap.className = 'bubble-wrap';
+  const span = document.createElement('span');
+  span.className = 'bubble';
+  span.innerHTML = text;
+  bubbleWrap.appendChild(span);
+  if (tableHtml && who !== 'bot') {
+    const tableDiv = document.createElement('div');
+    tableDiv.innerHTML = tableHtml;
+    bubbleWrap.appendChild(tableDiv);
+  }
+  chartUX.style.display = "none";
+  if (chartObj) { chartObj.destroy(); chartObj = null; }
+  const timestamp = document.createElement('div');
+  timestamp.className = 'timestamp';
+  timestamp.textContent = getCurrentTime();
+  bubbleWrap.appendChild(timestamp);
+  if (who === 'user') {
+    div.appendChild(bubbleWrap);
+  } else {
+    div.appendChild(avatar);
+    div.appendChild(bubbleWrap);
+  }
+  chatDiv.appendChild(div);
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+function appendLoading() {
+  if (document.getElementById('chat-loading')) return;
+  const div = document.createElement('div');
+  div.className = 'bot';
+  div.id = 'chat-loading';
+  const bubbleWrap = document.createElement('div');
+  bubbleWrap.className = 'bubble-wrap';
+  const span = document.createElement('span');
+  span.className = 'bubble';
+  span.innerHTML = `잠시만 기다려주세요, 곧 처리하여 말씀드리겠습니다.`;
+  bubbleWrap.appendChild(span);
+  const timestamp = document.createElement('div');
+  timestamp.className = 'timestamp';
+  timestamp.textContent = getCurrentTime();
+  bubbleWrap.appendChild(timestamp);
+  const avatar = document.createElement('img');
+  avatar.className = 'avatar';
+  avatar.src = 'http://localhost:5001/static/bot.png';
+  avatar.alt = 'GPT';
+  div.appendChild(avatar);
+  div.appendChild(bubbleWrap);
+  chatDiv.appendChild(div);
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+function removeLoading() {
+  const div = document.getElementById('chat-loading');
+  if (div) div.remove();
+}
+
+send.onclick = sendMessage;
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) sendMessage(); });
+function sendMessage() {
+  const msg = input.value.trim();
+  if (!msg) return;
+  last_user_msg = msg;
+  appendMessage('user', msg);
+  input.value = '';
+  last_result = [];
+  last_columns = [];
+  document.getElementById('result-panel').style.display = 'none';
+  appendLoading();
+  fetch('http://localhost:5001/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: msg, chat_history }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      removeLoading();
+      last_result = data.all_result || [];
+      last_columns = data.columns || [];
+      last_sql = data.sql || '';
+      last_rows = data.db_result || [];
+      last_cols = data.columns || [];
+      let tableHtml = '';
+      if (data.db_result && data.db_result.length > 0) {
+        tableHtml = makeTableHtml(data.columns, data.db_result);
+      }
+      appendMessage('bot', data.report_text || '', tableHtml, last_result, last_columns, last_user_msg);
+      chat_history.push(['user', msg]);
+      if (data.report_text) chat_history.push(['bot', data.report_text]);
+      renderResultPanel(last_sql, last_cols, last_rows);
+      document.getElementById('result-panel').style.display = 'block';
+    })
+    .catch(() => {
+      removeLoading();
+      appendMessage('bot', '서버와 연결이 원활하지 않습니다.');
+    });
+}
+searchBtn.onclick = function() {
+  if (searchBar.style.display === 'none' || searchBar.style.display === '') {
+    searchBar.style.display = 'block';
+    searchInput.focus();
+  } else {
+    searchBar.style.display = 'none';
+    searchInput.value = '';
+    searchChat();
+  }
+};
+clearBtn.onclick = function() {
+  const confirmDiv = document.getElementById('chat-confirm');
+  confirmDiv.style.display = 'block';
+
+  const yesBtn = document.getElementById('chat-confirm-yes');
+  const noBtn = document.getElementById('chat-confirm-no');
+  yesBtn.onclick = function() {
+    confirmDiv.style.display = 'none';
+    clearChat();
+  };
+  noBtn.onclick = function() {
+    confirmDiv.style.display = 'none';
+  };
+};
+function clearChat() {
+  chatDiv.innerHTML = '';
+  chat_history = [];
+  last_result = [];
+  last_columns = [];
+  last_sql = '';
+  last_rows = [];
+  last_cols = [];
+  searchInput.value = '';
+  searchBar.style.display = 'none';
+  chartUX.style.display = "none";
+  if (chartObj) { chartObj.destroy(); chartObj = null; }
+  renderResultPanel('', [], []);
+  document.getElementById('result-panel').style.display = 'none';
+}
+searchInput.addEventListener('input', searchChat);
+function searchChat() {
+  const keyword = searchInput.value.trim().toLowerCase();
+  const allDivs = chatDiv.querySelectorAll('.user, .bot');
+  allDivs.forEach(div => {
+    const text = div.textContent.toLowerCase();
+    div.style.display = (keyword === "" || text.includes(keyword)) ? '' : 'none';
+  });
+}
+
+let loginMode = 'login';
+let currentUserId = null;
+
+// === 화면 표시 로직 (수정됨) ===
+function setAppVisible(visible) {
+  const mainApp = document.getElementById('main-app');
+  const mainHeader = document.getElementById('main-header');
+  const mainLogoWrap = document.getElementById('main-logo-wrap');
+  const loginBox = document.getElementById('login-box');
+  const gptifyActionBar = document.getElementById('gptify-action-bar');
+
+  if (visible) {
+    mainApp.style.display = 'flex';
+    mainHeader.style.display = 'flex';
+    mainLogoWrap.style.display = 'none';
+    loginBox.style.display = 'none';
+    gptifyActionBar.style.display = 'flex';
+    // 로그인 성공 시 기본 대시보드 표시
+    showBoard('main-dashboard-wrap', document.getElementById('main-header-logo'));
+  } else {
+    mainApp.style.display = 'none';
+    mainHeader.style.display = 'none';
+    mainLogoWrap.style.display = 'flex';
+    loginBox.style.display = 'flex';
+  }
+}
+
+window.onload = function() {
+  renderResultPanel('', [], []);
+  document.getElementById('result-panel').style.display = 'none';
+  // 시작 시 로그인 화면이 보이도록 설정
+  setAppVisible(false);
+
+  // 나머지 초기화 코드
+  renderBoardList(newsData, 'news-list', 'news-pagination');
+  renderBoardList(noticeData, 'notice-list', 'notice-pagination');
+  renderCalendar(currentMonth, currentYear, calEvents);
+  attachCalendarTooltip();
+  renderScheduleList(calEvents);
+}
+
+function handleLoginAction() {
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value.trim();
+  if (!id || !pw) {
+    document.getElementById('login-msg').textContent = "ID와 PW를 모두 입력하세요.";
+    return;
+  }
+  document.getElementById('login-msg').textContent = "";
+  if (loginMode === 'login') {
+    fetch('http://localhost:5001/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ user_id: id, user_pw: pw })
+    })
+    .then(res => {
+      if (!res.ok) return res.text().then(text => { throw new Error(text || res.statusText); });
+      return res.json();
+    })
+    .then(data => {
+      if (data.success) {
+        currentUserId = id;
+        document.getElementById('user-tab').textContent = 'User';
+        document.getElementById('user-id-label').textContent = currentUserId + " 님";
+        document.getElementById('user-tab').onclick = toggleLoginMenu;
+        document.getElementById('login-id').value = "";
+        document.getElementById('login-pw').value = "";
+        setAppVisible(true); // 로그인 성공 시 앱 화면으로 전환
+      } else {
+        document.getElementById('login-msg').textContent = data.message || "로그인 실패";
+        currentUserId = null;
+        document.getElementById('user-tab').textContent = "Login";
+        document.getElementById('user-tab').onclick = toggleLogin;
+        setAppVisible(false);
+      }
+    })
+    .catch(error => {
+      document.getElementById('login-msg').textContent = "서버 연결 오류: " + error.message;
+      currentUserId = null;
+      document.getElementById('user-tab').textContent = "Login";
+      document.getElementById('user-tab').onclick = toggleLogin;
+      setAppVisible(false);
+    });
+  } else { // 회원가입 로직
+    fetch('http://localhost:5001/signup', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ user_id: id, user_pw: pw })
+    })
+    .then(res => {
+      if (!res.ok) return res.text().then(text => { throw new Error(text || res.statusText); });
+      return res.json();
+    })
+    .then(data => {
+      if (data.success) {
+        document.getElementById('login-msg').style.color = "#1a8848";
+        document.getElementById('login-msg').textContent = "회원가입이 완료되었습니다.";
+        setTimeout(() => {
+          toggleLogin(); // 로그인 모드로 전환
+          document.getElementById('login-msg').textContent = "";
+          document.getElementById('login-msg').style.color = "#ca4036";
+        }, 1500);
+      } else {
+        document.getElementById('login-msg').style.color = "#ca4036";
+        document.getElementById('login-msg').textContent = data.message || "회원가입 실패";
+      }
+    })
+    .catch(error => {
+      document.getElementById('login-msg').textContent = "서버 연결 오류: " + error.message;
+    });
+  }
+}
+
+function toggleLogin() {
+  loginMode = 'login';
+  document.getElementById('login-title').textContent = "LOGIN";
+  document.getElementById('login-action-btn').textContent = "LOGIN";
+  document.getElementById('toggle-signup-btn').textContent = "SIGN UP";
+  document.getElementById('login-msg').textContent = "";
+  document.getElementById('login-id').value = "";
+  document.getElementById('login-pw').value = "";
+  setAppVisible(false);
+}
+
+function toggleSignup() {
+  loginMode = 'signup';
+  document.getElementById('login-title').textContent = "SIGN UP";
+  document.getElementById('login-action-btn').textContent = "SIGN UP";
+  document.getElementById('toggle-signup-btn').textContent = "BACK TO LOGIN";
+  document.getElementById('login-msg').textContent = "";
+  // 회원가입 모드에서 로그인으로 돌아가는 버튼 이벤트 핸들러 변경
+  document.getElementById('toggle-signup-btn').onclick = toggleLogin;
+}
+
+
+function toggleLoginMenu() {
+  const menu = document.getElementById('login-menu');
+  const form = document.getElementById('pwchange-form');
+  if (form) form.style.display = 'none';
+  menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+}
+
+document.getElementById('logout-btn').onclick = function() {
+  currentUserId = null;
+  document.getElementById('user-tab').textContent = "Login";
+  document.getElementById('login-menu').style.display = 'none';
+  setAppVisible(false);
+};
+
+document.getElementById('show-pwchange-btn').onclick = function(e) {
+  document.getElementById('login-menu').style.display = 'none';
+  document.getElementById('pwchange-form').style.display = 'flex';
+  e.stopPropagation();
+};
+
+document.getElementById('pwchange-cancel').onclick = function() {
+  document.getElementById('pwchange-form').style.display = 'none';
+};
+
+document.getElementById('pwchange-submit').onclick = function() {
+  const oldpw = document.getElementById('old-pw').value.trim();
+  const newpw = document.getElementById('new-pw').value.trim();
+  const newpw2 = document.getElementById('new-pw2').value.trim();
+  const msg = document.getElementById('pwchange-msg');
+  if (!oldpw || !newpw || !newpw2) {
+    msg.textContent = "모든 칸을 입력하세요.";
+    return;
+  }
+  if (newpw !== newpw2) {
+    msg.textContent = "새 비밀번호가 일치하지 않습니다.";
+    return;
+  }
+
+  fetch('http://localhost:5001/change_pw', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      user_id: currentUserId,
+      old_pw: oldpw,
+      new_pw: newpw
+    })
+  }).then(res => res.json()).then(data => {
+    if (data.success) {
+      msg.style.color = "#1a8848";
+      msg.textContent = "비밀번호가 변경되었습니다.";
+      setTimeout(() => {
+        document.getElementById('pwchange-form').style.display = 'none';
+        msg.textContent = "";
+        msg.style.color = "#ca4036";
+      }, 1200);
+    } else {
+      msg.style.color = "#ca4036";
+      msg.textContent = data.message || "오류 발생";
+    }
+  }).catch(() => {
+    msg.textContent = "서버 오류";
+  });
+};
+
+document.getElementById('show-result-panel-btn').onclick = function() {
+  const panel = document.getElementById('result-panel');
+  panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+};
+
+const perPage = 8;
+const newsData = [
+  {cat: 'AI', title: 'AI 기반 환자 선별 시스템 식약처 승인', date: '2025.07.17'},
+  {cat: '신약', title: '2025년 하반기 항암 신약 임상 돌입', date: '2025.07.16'},
+  {cat: '모집', title: '신장질환 환자 3상 1차 모집 마감', date: '2025.07.15'},
+  {cat: '업데이트', title: '데이터 통합 관리 솔루션 업데이트', date: '2025.07.14'},
+  {cat: 'AI', title: '임상정보포털 오픈베타 시작', date: '2025.07.13'},
+  {cat: '신약', title: '폐암 임상 환자 2차 모집 진행중', date: '2025.07.12'},
+  {cat: '모집', title: '임상 시험 참여자 대상 설명회 개최', date: '2025.07.11'},
+  {cat: 'AI', title: '의료 데이터 기반 임상 예측 정확도 개선', date: '2025.07.10'},
+  {cat: '점검', title: '임상시험 시스템 점검(7/9) 안내', date: '2025.07.09'},
+  {cat: '업데이트', title: '신규 피험자 관리 기능 추가', date: '2025.07.08'},
+  {cat: '신약', title: '백혈병 환자 임상 승인 완료', date: '2025.07.07'},
+  {cat: 'AI', title: 'AI 임상 상담 챗봇 시범 운영', date: '2025.07.06'},
+  {cat: '모집', title: '희귀질환 임상 연구 지원자 모집', date: '2025.07.05'},
+  {cat: '업데이트', title: '임상 연구 통계 대시보드 오픈', date: '2025.07.04'},
+  {cat: '점검', title: '의무기록 연동 점검 안내', date: '2025.07.03'},
+  {cat: '신약', title: '간암 임상 환자 추가 모집', date: '2025.07.02'},
+  {cat: 'AI', title: '임상시험 챗봇 FAQ 추가', date: '2025.07.01'},
+  {cat: '모집', title: '소아환자 임상시험 참여자 1차 모집', date: '2025.06.30'},
+  {cat: '점검', title: '시스템 긴급 패치 안내', date: '2025.06.29'},
+  {cat: '업데이트', title: '임상시험 신규 프로토콜 안내', date: '2025.06.28'},
+  {cat: 'AI', title: '임상 연구결과 리포트 AI 자동작성', date: '2025.06.27'},
+  {cat: '신약', title: '고혈압 임상 3상 연구 발표', date: '2025.06.26'},
+  {cat: '모집', title: '유전성 질환 임상시험 모집 안내', date: '2025.06.25'},
+  {cat: '점검', title: 'DB 서버 점검 예정(6/24)', date: '2025.06.24'},
+  {cat: '업데이트', title: '임상 대시보드 UI 개선', date: '2025.06.23'},
+];
+
+const noticeData = [
+  {cat: '업데이트', title: '의무기록 제출 절차 변경 안내', date: '2025.07.17'},
+  {cat: '점검', title: '임상시험센터 정기 소독 일정', date: '2025.07.16'},
+  {cat: '점검', title: '서버 점검(7/25) 안내', date: '2025.07.15'},
+  {cat: '업데이트', title: '통계리포트 신규 버전 안내', date: '2025.07.14'},
+  {cat: 'AI', title: 'IRB 심의자료 제출 기한 연장', date: '2025.07.13'},
+  {cat: '신약', title: '임상 시험용 신약 보관관리 주의', date: '2025.07.12'},
+  {cat: '모집', title: '임상 연구간호사 채용 안내', date: '2025.07.11'},
+  {cat: '점검', title: '데이터베이스 점검 및 백업', date: '2025.07.10'},
+  {cat: '업데이트', title: '모바일 임상정보시스템 오픈', date: '2025.07.09'},
+  {cat: 'AI', title: 'AI 기반 임상 질의응답 공지', date: '2025.07.08'},
+  {cat: '신약', title: '신규 치료제 임상배포 공지', date: '2025.07.07'},
+  {cat: '업데이트', title: '문서전자결재 시스템 도입', date: '2025.07.06'},
+  {cat: '점검', title: '의무기록 서버 정기 점검', date: '2025.07.05'},
+  {cat: 'AI', title: '의료 AI 윤리교육 일정', date: '2025.07.04'},
+  {cat: '모집', title: '연구지원센터 근무자 모집', date: '2025.07.03'},
+  {cat: '업데이트', title: '임상연구통계 리포트 추가', date: '2025.07.02'},
+  {cat: '신약', title: '임상시험용 신약 공급 일정', date: '2025.07.01'},
+  {cat: 'AI', title: 'AI 챗봇 내원 안내 기능 추가', date: '2025.06.30'},
+  {cat: '모집', title: '임상시험 피험자 등록 안내', date: '2025.06.29'},
+  {cat: '점검', title: '연구데이터 정기점검 안내', date: '2025.06.28'},
+  {cat: '업데이트', title: '업무용 임상 문서 샘플 배포', date: '2025.06.27'},
+  {cat: 'AI', title: 'AI 기반 연구 통계보고서 배포', date: '2025.06.26'},
+  {cat: '신약', title: '신약관리 프로토콜 최신화', date: '2025.06.25'},
+  {cat: '점검', title: 'DB 정기 점검 공지', date: '2025.06.24'},
+  {cat: '모집', title: '임상 데이터 관리자 모집', date: '2025.06.23'},
+];
+function renderBoardList(dataArr, listId, pagId) {
+  const list = document.getElementById(listId);
+  const pag = document.getElementById(pagId);
+  function render(page=1) {
+    list.innerHTML = "";
+    pag.innerHTML = "";
+    const totalPage = Math.ceil(dataArr.length / perPage);
+    const start = (page-1)*perPage;
+    const end = Math.min(start+perPage, dataArr.length);
+    for (let i=start; i<end; i++) {
+      const {cat, title, date} = dataArr[i];
+      let labelClass = "label-" + cat.replace(/[^\w]/g, "");
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span class="label ${labelClass}">${cat}</span>
+        <a href="#" class="board-title">${title}</a>
+        <span class="board-date">${date}</span>
+      `;
+      list.appendChild(li);
+    }
+
+    if (totalPage > 1) {
+      if (page > 1) {
+        const prev = document.createElement('a');
+        prev.className = 'page-num';
+        prev.innerHTML = '&lt;';
+        prev.href = "#";
+        prev.onclick = function(e){e.preventDefault(); render(page-1);}
+        pag.appendChild(prev);
+      }
+      for(let p=1; p<=totalPage; p++) {
+        const a = document.createElement('a');
+        a.className = 'page-num'+(p===page?' active':'');
+        a.textContent = p;
+        a.href = "#";
+        a.onclick = function(e){e.preventDefault(); render(p);}
+        pag.appendChild(a);
+      }
+      if (page < totalPage) {
+        const next = document.createElement('a');
+        next.className = 'page-num';
+        next.innerHTML = '&gt;';
+        next.href = "#";
+        next.onclick = function(e){e.preventDefault(); render(page+1);}
+        pag.appendChild(next);
+      }
+    }
+  }
+  render(1);
+}
+
+const calEvents = [
+  { date: 5,  month: 7, year: 2025, type: 'visit', label: '방문', desc: '임상시험센터 신규 등록' },
+  { date: 5,  month: 7, year: 2025, type: 'etc', label: '기타', desc: '임상약 공급 일정' },
+  { date: 12, month: 7, year: 2025, type: 'visit', label: '방문', desc: '호남대 2차 방문' },
+  { date: 12, month: 7, year: 2025, type: 'med', label: '약제점검', desc: '임상 D 약제 중간점검' },
+  { date: 17, month: 7, year: 2025, type: 'visit', label: '방문', desc: '피험자 추적조사 방문' },
+  { date: 22, month: 7, year: 2025, type: 'etc', label: '기타', desc: '기타 일정' },
+  { date: 25, month: 7, year: 2025, type: 'med', label: '약제점검', desc: '임상 F 약제 1차 점검' },
+  { date: 25, month: 7, year: 2025, type: 'visit', label: '방문', desc: '신규 피험자 내원예정' },
+  { date: 27, month: 7, year: 2025, type: 'etc', label: '기타', desc: '위원회 일정' },
+  { date: 1,  month: 8, year: 2025, type: 'etc', label: '기타', desc: '임상약 공급 일정' },
+  { date: 3,  month: 8, year: 2025, type: 'visit', label: '방문', desc: '메시 한국 방문' },
+  { date: 10, month: 8, year: 2025, type: 'med', label: '약제점검', desc: '임상 C 약제 최종점검' },
+  { date: 19, month: 8, year: 2025, type: 'visit', label: '방문', desc: '중간 피험자 검진' },
+  { date: 22, month: 8, year: 2025, type: 'visit', label: '방문', desc: '호날두 한국 방문' }
+];
+function renderCalendar(month, year, events=[]) {
+  const calendarBody = document.getElementById("calendar-body");
+  const calendarMonth = document.getElementById("calendar-month");
+  if (!calendarBody || !calendarMonth) return;
+  calendarBody.innerHTML = "";
+  const date = new Date(year, month, 1);
+  const today = new Date();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  let row = document.createElement("tr");
+  for(let i=0; i<date.getDay(); i++) row.appendChild(document.createElement("td"));
+  for(let d=1; d<=daysInMonth; d++) {
+    date.setDate(d);
+    let td = document.createElement("td");
+    const eventsForDay = events.filter(e => e.date === d && e.month === (month + 1) && e.year === year);
+    let tooltip = "";
+    if (eventsForDay.length > 0) {
+      td.classList.add("has-event");
+      let dotsHtml = `<div class="dots-wrap">`;
+      let tooltipArr = [];
+      eventsForDay.forEach(ev => {
+        dotsHtml += `<span class="cal-dot ${ev.type}"></span>`;
+        tooltipArr.push(`• ${ev.label} : ${ev.desc}`);
+      });
+      dotsHtml += `</div>`;
+      tooltip = tooltipArr.join('\n');
+      td.innerHTML = `<div class="calendar-day-num" title="${tooltip}">${d}</div>${dotsHtml}`;
+    } else {
+      td.innerHTML = `<div class="calendar-day-num">${d}</div>`;
+    }
+
+    if ( d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+        td.classList.add("today");
+    }
+    row.appendChild(td);
+    if (date.getDay() === 6 || d === daysInMonth) {
+      calendarBody.appendChild(row);
+      row = document.createElement("tr");
+    }
+  }
+  calendarMonth.textContent = `${year}년 ${month+1}월`;
+}
+let now = new Date();
+let currentMonth = now.getMonth(), currentYear = now.getFullYear();
+
+function renderScheduleList(events) {
+  const thisMonthUl = document.getElementById('events-this-month');
+  const nextMonthUl = document.getElementById('events-next-month');
+  if (!thisMonthUl || !nextMonthUl) return;
+  thisMonthUl.innerHTML = "";
+  nextMonthUl.innerHTML = "";
+
+  const now = new Date();
+  const thisMonth = now.getMonth() + 1;
+  const thisYear = now.getFullYear();
+  const nextMonth = thisMonth === 12 ? 1 : thisMonth + 1;
+  const nextYear = thisMonth === 12 ? thisYear + 1 : thisYear;
+
+  events.forEach(e => {
+    const li = document.createElement('li');
+    const dot = `<span class="cal-dot ${e.type}" style="margin-right: 8px;"></span>`;
+    const dateNum = `<span class="event-date-num">${e.date}일</span>`;
+    li.innerHTML = `${dot} ${dateNum} <span style="margin-left:8px; color:#495057;">[${e.label}] ${e.desc}</span>`;
+
+    if (e.month === thisMonth && e.year === thisYear) {
+      thisMonthUl.appendChild(li);
+    } else if (e.month === nextMonth && e.year === nextYear) {
+      nextMonthUl.appendChild(li);
+    }
+  });
+}
+
+function attachCalendarTooltip() {
+  document.querySelectorAll(".calendar-table td").forEach(td => {
+    let dayNumDiv = td.querySelector('.calendar-day-num');
+    if(!dayNumDiv || !dayNumDiv.title) return;
+    td.onmouseenter = e => {
+      let tooltip = document.createElement("div");
+      tooltip.className = "custom-cal-tooltip";
+      tooltip.innerHTML = dayNumDiv.title.replace(/\n/g, "<br>");
+      document.body.appendChild(tooltip);
+      let rect = td.getBoundingClientRect();
+      tooltip.style.left = (rect.left + rect.width/2 - tooltip.offsetWidth/2) + "px";
+      tooltip.style.top = (rect.bottom + window.scrollY + 8) + "px";
+      setTimeout(()=>{tooltip.classList.add("active");}, 10);
+      td._calTip = tooltip;
+    };
+    td.onmousemove = e => {
+      let tooltip = td._calTip;
+      if(tooltip) {
+        let rect = td.getBoundingClientRect();
+        tooltip.style.left = (rect.left + rect.width/2 - tooltip.offsetWidth/2) + "px";
+        tooltip.style.top = (rect.bottom + window.scrollY + 8) + "px";
+      }
+    }
+    td.onmouseleave = () => {
+      let tooltip = td._calTip;
+      if(tooltip) {
+        tooltip.classList.remove("active");
+        setTimeout(()=>{ tooltip && tooltip.remove(); }, 160);
+      }
+      td._calTip = null;
+    }
+  });
+}
+
+// === 탭 전환 로직 (수정됨) ===
+function showBoard(boardId, activeTab) {
+    document.querySelectorAll('.content-board').forEach(board => {
+        board.style.display = 'none';
+    });
+    document.querySelectorAll('.text-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    const boardToShow = document.getElementById(boardId);
+    if (boardToShow) {
+        boardToShow.style.display = 'block'; // 모든 보드는 block으로 표시
+        if(boardId === 'main-dashboard-wrap') {
+            boardToShow.style.display = 'flex'; // 대시보드만 flex
+        }
+    }
+
+    if (activeTab && activeTab.id !== 'main-header-logo') {
+        activeTab.classList.add('active');
+    }
+}
+
+document.getElementById('user-tab').onclick = function(e) {
+  const menu = document.getElementById('login-menu');
+  menu.style.display = (menu.style.display === 'block' || menu.style.display === 'flex') ? 'none' : 'flex';
+  e.stopPropagation();
+};
+
+window.onclick = function(e) {
+  if (!e.target.closest('#login-menu') && !e.target.closest('#user-tab')) {
+    document.getElementById('login-menu').style.display = 'none';
+  }
+};
+
+document.getElementById('tab-1').onclick = function() { showBoard('tab1-board', this); };
+document.getElementById('tab-2').onclick = function() { showBoard('tab2-board', this); };
+document.getElementById('tab-3').onclick = function() { showBoard('tab3-board', this); };
+document.getElementById('main-header-logo').onclick = function() { showBoard('main-dashboard-wrap', this); };
+
+
+function loadTabContent(tabId, htmlPath) {
+  const contentSelector = `#${tabId} #main-dashboard-content`;
+
+  fetch(htmlPath)
+    .then(res => res.text())
+    .then(html => {
+      document.querySelector(contentSelector).innerHTML = html;
+
+      const tabWrap = document.querySelector(`#${tabId}`);
+      const tabBtns = tabWrap.querySelectorAll('.ecrf-tab-btn');
+      const tabContents = tabWrap.querySelectorAll('.ecrf-tab-content');
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabContents.forEach(s => s.style.display = 'none');
+          const target = tabWrap.querySelector(`#${btn.dataset.tab}`);
+          if (target) target.style.display = 'block';
+          tabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+      const firstTab = tabWrap.querySelector(`#${tabBtns[0].dataset.tab}`);
+      if (firstTab) firstTab.style.display = 'block';
+      tabBtns[0].classList.add('active');
+    })
+    .catch(err => {
+      console.error(`${htmlPath} 로드 실패:`, err);
+      document.querySelector(contentSelector).innerHTML = `<p style='color:red'>${htmlPath} 로드 실패</p>`;
+    });
+}
+document.getElementById("tab-3").addEventListener("click", () => {
+  showBoard("tab3-board", document.getElementById("tab-3"));
+  loadTabContent("tab3-board", "tab3.html");
+});
+document.getElementById("tab-2").addEventListener("click", () => {
+  showBoard("tab2-board", document.getElementById("tab-2"));
+  loadTabContent("tab2-board", "tab2.html");
+});
+document.getElementById("tab-1").addEventListener("click", () => {
+  showBoard("tab1-board", document.getElementById("tab-1"));
+  loadTabContent("tab1-board", "tab1.html");
+});
+
+function loadTab2Content(tabId, htmlPath) {
+  const contentSelector = `#${tabId} #main-dashboard-content`;
+
+  fetch(htmlPath)
+    .then(res => res.text())
+    .then(html => {
+      document.querySelector(contentSelector).innerHTML = html;
+    })
+    .catch(err => {
+      console.error(`${htmlPath} 로드 실패:`, err);
+      document.querySelector(contentSelector).innerHTML = `<p style='color:red'>${htmlPath} 로드 실패</p>`;
+    });
+}
+
+
+</script>
+</body>
+</html>
+<!--복사확인용-->

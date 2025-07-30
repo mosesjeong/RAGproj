@@ -1,0 +1,87 @@
+# [테이블: PATIENTS, ADMISSIONS, ICUSTAYS, TRANSFERS, SERVICES, DRGCODES]
+
+PATIENTS
+SUBJECT_ID | 환자ID | 환자, subject, patient, 환자번호, 병록번호
+GENDER | 성별 | 성, gender, 남성, 여성, 남자, 여자
+ANCHOR_AGE | 기준나이 | 나이, 연령, age, 만, old
+ANCHOR_YEAR | 기준연도 | 연도, year
+ANCHOR_YEAR_GROUP | 기준연도그룹 | 연도그룹, group
+DOD | 사망일 | 사망, death, dod
+
+ADMISSIONS
+HADM_ID | 입원ID | 입원, 입원번호, hadm, hospitalization, admission
+ADMITTIME | 입원시각 | 입원일, 입원시간, admission time, 입실, 입원날짜
+DISCHTIME | 퇴원시각 | 퇴원일, 퇴원시간, discharge time, 퇴실, 퇴원날짜
+DEATHTIME | 입원중사망시각 | 사망일, 사망시간, death time, expire time, 사망날짜
+ADMISSION_TYPE | 입원유형 | 입원종류, 유형, type, emergency, elective, urgent, planned, 응급, 계획
+ADMISSION_LOCATION | 입원위치 | 입원장소, admission loc, 병동, 응급실, 외래, location, 입원경로
+DISCHARGE_LOCATION | 퇴원위치 | 퇴원장소, discharge loc, 귀가, 사망, 전원, location, 퇴원경로
+INSURANCE | 보험유형 | 보험, insurance, 의료보험, 국민보험, 사보험
+LANGUAGE | 언어 | 사용언어, language, 국적, 언어코드
+MARITAL_STATUS | 결혼상태 | 혼인상태, marital, single, married, divorced, widowed, 결혼여부
+RACE | 인종 | race, 인종정보, white, black, asian, race_ethnicity, 민족
+EDREGTIME | 응급실등록시각 | 응급실 등록, ed reg, 응급등록시간, 응급도착시간
+EDOUTTIME | 응급실퇴실시각 | 응급실 퇴실, ed out, 응급퇴실시간, 응급나간시간
+HOSPITAL_EXPIRE_FLAG | 입원중사망여부 | 사망여부, expire flag, 0=생존, 1=사망, 사망, 병원사망
+
+ICUSTAYS
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+STAY_ID | ICU입원ID | stay, icu, 중환자실
+FIRST_CAREUNIT | 최초ICU유형
+LAST_CAREUNIT | 퇴실ICU유형
+INTIME | 입실시각
+OUTTIME | 퇴실시각
+LOS | 재원기간
+
+TRANSFERS
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+TRANSFER_ID | 이동ID
+EVENTTYPE | 이벤트유형
+CAREUNIT | 병동
+INTIME | 입실시각
+OUTTIME | 퇴실시각
+
+SERVICES
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+TRANSFERTIME | 서비스이동시각
+PREV_SERVICE | 이전서비스
+CURR_SERVICE | 현재서비스
+
+DRGCODES
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+DRG_TYPE | DRG유형
+DRG_CODE | DRG코드
+DESCRIPTION | 설명
+DRG_SEVERITY | 중증도
+DRG_MORTALITY | 사망위험
+
+# [FAQ]
+Q: 65세 이상 환자 명단
+A: SELECT subject_id, gender, anchor_age, anchor_year, dod FROM patients WHERE anchor_age >= 65
+
+Q: 최근 1년간 사망한 환자 명단 (환자ID, 사망일자)
+A: SELECT subject_id, dod FROM patients WHERE dod IS NOT NULL AND dod >= ADD_MONTHS(SYSDATE, -12)
+
+Q: 80세 이상 환자 명단 (환자ID, 성별, 나이)
+A: SELECT subject_id, gender, anchor_age FROM patients WHERE anchor_age >= 80
+
+Q: 최근 1년간 사망한 환자 명단(환자ID, 사망일자, 성별)
+A: SELECT subject_id, dod, gender FROM patients WHERE dod IS NOT NULL AND dod >= ADD_MONTHS(SYSDATE, -12)
+
+# [유의어]
+"여자", "여성" → gender='F'
+"남자", "남성" → gender='M'
+"나이", "연령", "만" → anchor_age
+"사망", "사망일" → dod
+"입원", "입원ID" → hadm_id
+"퇴원", "퇴원ID" → dischtime
+
+# [활용팁]
+admittime: 입원/시작일
+dischtime: 퇴원/종료일
+anchor_age: 나이, 300=극고령(개인정보 보호)
+hospital_expire_flag: 입원중 사망여부, deathtime: 입원 중 실제 사망시각
