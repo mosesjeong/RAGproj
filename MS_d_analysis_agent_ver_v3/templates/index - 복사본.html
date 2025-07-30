@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPTify 데이터 분석 시스템</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f5f6fa;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        /* 사이드바 스타일 */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background-color: #ffffff;
+            border-right: 1px solid #e1e5e9;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e1e5e9;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar-nav {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .sidebar-nav-item {
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .sidebar-nav-link {
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 12px 24px;
+            font-size: 1.06em;
+            cursor: pointer;
+            color: #343A40;
+            transition: background 0.2s;
+            width: 100%;
+            display: block;
+            text-decoration: none;
+        }
+
+        .sidebar-nav-link:hover {
+            background: #e9ecef;
+            color: #3A86FF;
+            font-weight: 600;
+        }
+
+        .sidebar-nav-link.active {
+            background-color: #E0EDFF;
+            color: #3A86FF;
+            font-weight: 700;
+            border-left: 4px solid #3A86FF;
+            text-align: center;
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .sidebar-nav-link i {
+            margin-right: 0.75rem;
+            width: 16px;
+        }
+
+        /* 메인 콘텐츠 영역 */
+        .main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        .content-body {
+            padding: 2rem;
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .file-upload-area {
+            border: 2px dashed #dadce0;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: #1a73e8;
+            background: #e8f0fe;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #1a73e8;
+            background: #e8f0fe;
+        }
+
+        .placeholder-content {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #5f6368;
+        }
+
+        .placeholder-content i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #dadce0;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+            border: 1px solid #e1e5e9;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .result-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .analysis-item {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+        }
+
+        .analysis-result {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-container {
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .loading-text {
+            margin-left: 0.5rem;
+        }
+
+        .api-key-input {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            margin: -2rem -2rem 2rem -2rem;
+            z-index: 10;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h5 class="mb-0"><i class="bi bi-robot"></i> GPTify 분석</h5>
+        </div>
+        <ul class="sidebar-nav nav">
+            <li class="sidebar-nav-item">
+                <button class="sidebar-nav-link active" data-bs-toggle="tab" data-bs-target="#csv-upload-panel" type="button" role="tab">
+                    <i class="bi bi-cloud-upload"></i> CSV 업로드
+                </button>
+            </li>
+            <li class="sidebar-nav-item">
+                <button class="sidebar-nav-link" data-bs-toggle="tab" data-bs-target="#suggestion-panel" type="button" role="tab">
+                    <i class="bi bi-lightbulb"></i> 통계분석 제안
+                </button>
+            </li>
+            <li class="sidebar-nav-item">
+                <button class="sidebar-nav-link" data-bs-toggle="tab" data-bs-target="#analysis-panel" type="button" role="tab">
+                    <i class="bi bi-bar-chart-line"></i> 시각화 및 분석
+                </button>
+            </li>
+            <li class="sidebar-nav-item">
+                <button class="sidebar-nav-link" data-bs-toggle="tab" data-bs-target="#report-panel" type="button" role="tab">
+                    <i class="bi bi-file-earmark-text"></i> 최종 보고서
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="content-body">
+            <div class="api-key-input">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-key"></i></span>
+                            <input type="password" class="form-control" id="apiKey" placeholder="OpenAI API 키를 입력하세요">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">분석 계획 및 리포트 생성에 필요합니다.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="mainTabContent">
+                <div class="tab-pane fade show active" id="csv-upload-panel" role="tabpanel">
+                    <h4 class="mb-4">1. CSV 업로드</h4>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <i class="bi bi-cloud-upload display-4 text-muted"></i>
+                                <h6 class="mt-2">분석할 CSV 파일 업로드</h6>
+                                <p class="text-muted mb-3">파일을 여기에 드래그하거나 클릭하여 선택</p>
+                                <input type="file" id="csvFile" accept=".csv" class="form-control" style="display: none;">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div id="csvPreview" style="display: none;" class="mt-3 mt-lg-0">
+                                <h6>파일 정보 및 미리보기:</h6>
+                                <div id="csvInfo" class="small text-muted mb-2"></div>
+                                <div class="result-table">
+                                    <table id="csvTable" class="table table-sm table-striped">
+                                        <thead class="table-light"></thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div class="text-end mt-3">
+                                    <button class="btn btn-primary" onclick="goToStep(2)">분석 계획 수립하기</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="suggestion-panel" role="tabpanel">
+                    <h4 class="mb-4">2. 통계분석 제안</h4>
+                    <div id="planPlaceholder" class="placeholder-content">
+                        <i class="bi bi-lightbulb"></i>
+                        <h5>분석 계획 제안</h5>
+                        <p>CSV 파일을 먼저 업로드하면, AI가 실행 가능한 분석 계획을 제안합니다.</p>
+                    </div>
+                    <div id="planContent" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>AI가 제안한 분석 계획:</h6>
+                            <button class="btn btn-primary" id="generatePlanBtn" onclick="generatePlan()">
+                                <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                <span class="loading-text">계획 생성하기</span>
+                            </button>
+                        </div>
+                        <div id="analysisPlan"></div>
+                        <div class="text-end mt-3" id="executeSection" style="display: none;">
+                            <button class="btn btn-success" onclick="executeAnalysis()">
+                                <i class="bi bi-play-circle"></i> 선택한 분석 실행하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="analysis-panel" role="tabpanel">
+                    <h4 class="mb-4">3. 시각화 및 분석</h4>
+                    <div id="analysisPlaceholder" class="placeholder-content">
+                        <i class="bi bi-bar-chart-line"></i>
+                        <h5>분석 결과</h5>
+                        <p>통계분석 제안 단계에서 실행을 원하는 분석을 선택하면, 이곳에 결과가 표시됩니다.</p>
+                    </div>
+                    <div id="analysisResults"></div>
+                </div>
+
+                <div class="tab-pane fade" id="report-panel" role="tabpanel">
+                    <h4 class="mb-4">4. 최종 보고서</h4>
+                    <div id="reportPlaceholder" class="placeholder-content">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <h5>최종 요약 보고서</h5>
+                        <p>모든 분석이 완료되면, AI가 분석 결과를 종합한 최종 보고서를 생성합니다.</p>
+                    </div>
+                    <div id="finalReport" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>AI 생성 분석 보고서</h6>
+                            <button class="btn btn-outline-secondary" onclick="downloadReport()">
+                                <i class="bi bi-download"></i> 다운로드
+                            </button>
+                        </div>
+                        <div id="reportContent" class="border rounded p-3 bg-light"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        // 👈 [수정] 전역 변수 추가
+        let pollingInterval = null;
+
+        let uploadedData = null;
+        let currentPlan = [];
+        let analysisResults = [];
+        let finalReportContent = '';
+
+        // 파일 업로드 처리
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                uploadFile(file);
+            }
+        });
+
+        // 드래그 앤 드롭 처리
+        const uploadArea = document.getElementById('fileUploadArea');
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadFile(files[0]);
+            }
+        });
+
+        uploadArea.addEventListener('click', function() {
+            document.getElementById('csvFile').click();
+        });
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload_csv', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    uploadedData = data;
+                    displayCsvPreview(data);
+                    showPlanContent();
+                    showAlert('success', data.message);
+                } else {
+                    showAlert('danger', data.message);
+                }
+            })
+            .catch(error => {
+                showAlert('danger', '파일 업로드 중 오류가 발생했습니다.');
+                console.error('Error:', error);
+            });
+        }
+
+        function displayCsvPreview(data) {
+            document.getElementById('csvInfo').textContent = data.message;
+
+            const table = document.getElementById('csvTable');
+            const thead = table.querySelector('thead');
+            const tbody = table.querySelector('tbody');
+
+            thead.innerHTML = '<tr>' + data.columns.map(col => `<th>${col}</th>`).join('') + '</tr>';
+            tbody.innerHTML = data.preview.map(row =>
+                '<tr>' + data.columns.map(col => `<td>${row[col] || ''}</td>`).join('') + '</tr>'
+            ).join('');
+
+            document.getElementById('csvPreview').style.display = 'block';
+        }
+
+        function showPlanContent() {
+            document.getElementById('planPlaceholder').style.display = 'none';
+            document.getElementById('planContent').style.display = 'block';
+        }
+
+        function generatePlan() {
+            const apiKey = document.getElementById('apiKey').value;
+            if (!apiKey) {
+                showAlert('warning', 'OpenAI API 키를 먼저 입력해주세요.');
+                return;
+            }
+
+            const btn = document.getElementById('generatePlanBtn');
+            const spinner = btn.querySelector('.spinner-border');
+            const text = btn.querySelector('.loading-text');
+
+            spinner.classList.remove('d-none');
+            text.textContent = '계획 생성 중...';
+            btn.disabled = true;
+
+            fetch('/generate_plan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ api_key: apiKey })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentPlan = data.plan;
+                    displayAnalysisPlan(data.plan);
+                    document.getElementById('executeSection').style.display = 'block';
+                    showAlert('success', data.message);
+                } else {
+                    showAlert('danger', data.message);
+                }
+            })
+            .catch(error => {
+                showAlert('danger', '분석 계획 생성 중 오류가 발생했습니다.');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                spinner.classList.add('d-none');
+                text.textContent = '계획 생성하기';
+                btn.disabled = false;
+            });
+        }
+
+        function displayAnalysisPlan(plan) {
+            const planContainer = document.getElementById('analysisPlan');
+            planContainer.innerHTML = plan.map((item, index) => `
+                <div class="analysis-item">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="${index}" id="analysis${index}" checked>
+                        <label class="form-check-label" for="analysis${index}">
+                            <strong>${item.tool_name}</strong>: ${JSON.stringify(item.tool_args)}
+                        </label>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 👈 [수정] executeAnalysis 함수 수정
+        function executeAnalysis() {
+            const apiKey = document.getElementById('apiKey').value;
+            if (!apiKey) {
+                showAlert('warning', 'OpenAI API 키를 먼저 입력해주세요.');
+                return;
+            }
+
+            const selectedAnalyses = Array.from(document.querySelectorAll('#analysisPlan input:checked'))
+                .map(checkbox => parseInt(checkbox.value));
+
+            if (selectedAnalyses.length === 0) {
+                showAlert('warning', '실행할 분석을 선택해주세요.');
+                return;
+            }
+
+            goToStep(3);
+
+            // 로딩 UI 표시
+            document.getElementById('analysisPlaceholder').style.display = 'none';
+            document.getElementById('analysisResults').innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5 class="mt-3">분석을 시작합니다...</h5>
+                    <p class="text-muted">서버에서 분석이 진행 중입니다. 잠시만 기다려주세요.</p>
+                </div>
+            `;
+
+            // 분석 시작 요청
+            fetch('/execute_analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    api_key: apiKey,
+                    selected_analyses: selectedAnalyses
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.task_id) {
+                    // 성공적으로 작업이 시작되면, task_id로 결과 폴링 시작
+                    pollTaskStatus(data.task_id);
+                } else {
+                    // 작업 시작 실패 시
+                    showAnalysisError(data.message || '분석 시작에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAnalysisError('분석 시작 중 네트워크 오류가 발생했습니다.');
+            });
+        }
+
+        // 👈 [수정] 상태 폴링 함수 추가
+        function pollTaskStatus(taskId) {
+            pollingInterval = setInterval(() => {
+                fetch(`/get_task_status/${taskId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'completed') {
+                            clearInterval(pollingInterval);
+                            analysisResults = data.results;
+                            finalReportContent = data.report;
+                            displayAnalysisResults(data.results);
+                            displayFinalReport(data.report);
+                            showAlert('success', data.message);
+                        } else if (data.status === 'failed') {
+                            clearInterval(pollingInterval);
+                            showAnalysisError(data.message);
+                        } else if (data.status === 'not_found') {
+                            clearInterval(pollingInterval);
+                            showAnalysisError('서버에서 작업을 찾을 수 없습니다. 다시 시도해주세요.');
+                        }
+                        // 'pending' 또는 'running' 상태일 때는 아무것도 하지 않고 다음 폴링을 기다림
+                    })
+                    .catch(error => {
+                        clearInterval(pollingInterval);
+                        console.error('Polling Error:', error);
+                        showAnalysisError('결과를 가져오는 중 네트워크 오류가 발생했습니다.');
+                    });
+            }, 3000); // 3초마다 상태 확인
+        }
+
+        // 👈 [수정] 분석 오류 표시 함수 추가
+        function showAnalysisError(message) {
+             document.getElementById('analysisResults').innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="bi bi-exclamation-triangle display-4"></i>
+                    <h5>분석 실행 중 오류가 발생했습니다</h5>
+                    <p>${message}</p>
+                </div>
+            `;
+            showAlert('danger', message);
+        }
+
+        function displayAnalysisResults(results) {
+            const resultsContainer = document.getElementById('analysisResults');
+
+            resultsContainer.innerHTML = results.map(result => {
+                let content = `
+                    <div class="analysis-result">
+                        <h6 class="text-primary">${result.tool || '분석 결과'}</h6>
+                `;
+
+                if (result.variables) {
+                    content += `<p><strong>변수:</strong> ${Array.isArray(result.variables) ? result.variables.join(', ') : JSON.stringify(result.variables)}</p>`;
+                } else if (result.variable) {
+                    content += `<p><strong>변수:</strong> ${result.variable}</p>`;
+                }
+
+                if (result.results) {
+                    content += `
+                        <div class="bg-light p-3 rounded mb-3">
+                            <h6>분석 결과:</h6>
+                            <pre class="mb-0">${JSON.stringify(result.results, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+
+                if (result.contingency_table) {
+                    content += `
+                        <div class="bg-light p-3 rounded mb-3">
+                            <h6>분할표 (Contingency Table):</h6>
+                            <pre class="mb-0">${JSON.stringify(result.contingency_table, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+
+                if (result.chart) {
+                    content += `
+                        <div class="chart-container">
+                            <img src="data:image/png;base64,${result.chart}" alt="차트" />
+                        </div>
+                    `;
+                }
+
+                if (result.error) {
+                    content += `<div class="alert alert-danger">${result.error}</div>`;
+                }
+
+                content += '</div>';
+                return content;
+            }).join('');
+        }
+
+        function displayFinalReport(report) {
+            if (report) {
+                document.getElementById('reportPlaceholder').style.display = 'none';
+                document.getElementById('finalReport').style.display = 'block';
+                const htmlContent = marked.parse(report);
+                document.getElementById('reportContent').innerHTML = htmlContent;
+            }
+        }
+
+        function downloadReport() {
+            const element = document.createElement('a');
+            const file = new Blob([finalReportContent], {type: 'text/markdown'});
+            element.href = URL.createObjectURL(file);
+            element.download = 'langgraph_analysis_report.md';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function goToStep(step) {
+            const tabButtons = document.querySelectorAll('.sidebar-nav-link');
+            const targetTabButton = tabButtons[step - 1];
+            if (targetTabButton) {
+                const tab = bootstrap.Tab.getOrCreateInstance(targetTabButton);
+                tab.show();
+            }
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        document.querySelector('.sidebar-nav').addEventListener('click', function(e) {
+            const target = e.target.closest('.sidebar-nav-link');
+            if (target) {
+                document.querySelectorAll('.sidebar-nav-link').forEach(l => l.classList.remove('active'));
+                target.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>
