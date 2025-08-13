@@ -1,0 +1,126 @@
+# [임상시험 데이터 참조지침/실무 FAQ/SQL 예시]
+
+## [1] 금기 음식 및 약물
+
+### 금기 음식 (임상시험 중 섭취 금지)
+- 자몽/자몽주스(Grapefruit): CYP3A 대사효소 억제, 약물농도↑, 부작용 위험↑
+- 세비야 오렌지(Seville orange, 마멀레이드 등): CYP3A 영향
+- 스타프루트(Starfruit): 대사작용 영향 가능
+- *적용기간*: 시험약 투여 3일 전 ~ 임상시험 종료일까지
+
+### 금기 약물/병용 주의
+- 강한 CYP3A 유도제: rifampin, carbamazepine, phenytoin 등 → 병용 금지(약효↓)
+- 강/중등도 CYP3A 억제제: ketoconazole, erythromycin 등 → venetoclax 병용시 감량(중등도 1/2, 강 1/8)
+- P-gp 억제제: verapamil, amiodarone 등 → 가능시 대체, 병용시 venetoclax 1/2 감량
+- 와파린(쿠마린계): INR 모니터링
+- 치료지수 좁은 P-gp 기질(예: digoxin): venetoclax 투여 6시간 전 복용
+- BCRP/OATP1B1/1B3 관련 약물: 상호작용 위험, 주의
+
+#### [SQL 예시] 금기 약물 병용 환자 조회
+SELECT * FROM prescriptions
+ WHERE subject_id = :subject_id
+   AND (LOWER(drug) IN ('rifampin','carbamazepine','phenytoin','ketoconazole','erythromycin')
+    OR LOWER(drug_type) LIKE '%cyp3a%'
+    OR LOWER(description) LIKE '%p-gp inhibitor%');
+
+---
+
+## [2] 임상시험 대상/제외 기준 SQL 변환 예시
+
+- HbA1c 6.5% 초과자 제외:
+NOT EXISTS (
+  SELECT 1 FROM labevents l JOIN d_labitems d ON l.itemid = d.itemid
+  WHERE l.subject_id = p.subject_id AND LOWER(d.label) LIKE '%hba1c%' AND l.valuenum > 6.5
+)
+- 3개월 이내 항생제 복용자 제외:
+NOT EXISTS (
+  SELECT 1 FROM prescriptions
+   WHERE subject_id = p.subject_id
+     AND drug_type='ANTIBIOTIC'
+     AND starttime >= ADD_MONTHS(SYSDATE,-3)
+)
+- 심부전/암/중증간질환 진단자 제외:
+NOT EXISTS (
+  SELECT 1 FROM diagnoses_icd d
+  JOIN d_icd_diagnoses dd ON d.icd_code = dd.icd_code AND d.icd_version = dd.icd_version
+  WHERE d.subject_id = p.subject_id
+    AND (LOWER(dd.long_title) LIKE '%heart failure%'
+      OR LOWER(dd.long_title) LIKE '%cancer%'
+      OR LOWER(dd.long_title) LIKE '%severe liver disease%')
+)
+
+---
+
+## [3] 임상시험 관리/탈락/중지 실무
+
+### 탈락/중지/종료 기준
+- 탈락(dropout): 동의 철회, 추적 실패, 건강 악화, 중대한 계획서 위반, 약물 이상반응 등
+- 종료: 마지막 피험자 첫 투약 후 2년
+- 처리: 사유/근거 CRF 기록, 중도탈락시 안전성 추적(전화/편지 등)
+
+#### [SQL 예시] 탈락 환자 조회
+SELECT * FROM dropout
+ WHERE reason IN ('동의 철회', '추적 실패', '약물 이상반응', '건강 악화');
+
+---
+
+## [4] 이상반응(AE/ADR/SAE/SUSAR) 관리 및 SQL
+
+### 용어설명
+- AE: 이상반응 (임상시험약 투여 후 발생한 모든 부작용/증상, 약물 인과관계 불문)
+- ADR: 약물과 인과관계 배제 불가한 이상반응
+- SAE: Serious AE, 사망/생명위협/입원 등
+- SUSAR: 예상치 못한 중대한 약물이상반응
+
+#### [SQL 예시] 이상반응/중대한 이상반응/SUSAR 집계
+- 이상반응 집계:
+SELECT COUNT(*) FROM adverse_events
+ WHERE event_type IN ('adverse event', 'adverse reaction', 'side effect');
+
+- 중대한 이상반응 보고율:
+SELECT COUNT(*)/ (SELECT COUNT(*) FROM subjects) AS sae_rate
+ FROM adverse_events
+WHERE seriousness = 'serious';
+
+- SUSAR/SAE 사례:
+SELECT * FROM adverse_events
+ WHERE seriousness = 'serious'
+   AND (expected = 'N' OR related = 'Y');
+
+---
+
+## [5] 실전 FAQ
+
+Q. 임상시험 금기 음식은?
+A. 자몽, 세비야 오렌지, 스타프루트 (CYP3A 대사효소 억제, 임상시험 중 섭취 금지)
+
+Q. 임상시험 제외/대상 조건?
+A. 3개월 이내 항생제, HbA1c 6.5% 초과, 심부전/암 등 진단자 제외
+
+Q. 이상반응 관리는?
+A. AE/ADR/SAE/SUSAR 기준 정의 참고, event/adverse/reaction 등 키워드로 검색
+
+Q. 탈락 환자 관리?
+A. CRF 기록, 추가 추적(전화/편지 등), 주요 사유 DB 관리
+
+---
+
+## [6] 임상시험/약물/안전성 데이터 용어 요약
+
+| 용어     | 의미                                               |
+|---------|---------------------------------------------------|
+| AE      | 임상시험 중 발생한 모든 이상반응(약물 인과관계 불문)  |
+| ADR     | 약물과 인과관계 배제 불가한 부작용                  |
+| SAE     | 사망, 생명위협, 입원 등 중대한 이상반응              |
+| SUSAR   | 예상치 못한 중대한 약물이상반응                     |
+| CYP3A   | 간 대사효소, 혈중 약물농도에 영향                   |
+| P-gp    | 세포막 약물배출 단백질, 상호작용/부작용 영향         |
+| CRF     | Case Report Form(증례기록서)                        |
+
+---
+
+## [7] 데이터 추출/자동화 참고
+
+- event, adverse, reaction, side effect 등 키워드는 자연어→SQL 변환시 mapping table로 관리
+- 중증도/인과관계/경과/처치 등 컬럼, prescriptions/pharmacy/adverse_events/emar 등 테이블 연계 활용
+- 실무 확장 항목 필요시 주석 추가/보완 가능

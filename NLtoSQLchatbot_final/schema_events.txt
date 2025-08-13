@@ -1,0 +1,122 @@
+# [테이블: CHARTEVENTS, LABEVENTS, DATETIMEEVENTS, OUTPUTEVENTS, D_ITEMS, D_LABITEMS, MICROBIOLOGYEVENTS, OMR]
+
+CHARTEVENTS
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+STAY_ID | ICU입원ID
+CHARTTIME | 기록시각
+STORETIME | 저장시각
+ITEMID | 항목ID
+VALUE | 측정값
+VALUENUM | 수치값
+VALUEUOM | 단위
+WARNING | 경고
+
+LABEVENTS
+LABEVENT_ID | 검사ID
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+SPECIMEN_ID | 검체ID
+ITEMID | 항목ID
+CHARTTIME | 검사시각
+STORETIME | 저장시각
+VALUE | 결과
+VALUENUM | 수치결과
+VALUEUOM | 단위
+REF_RANGE_LOWER | 정상하한
+REF_RANGE_UPPER | 정상상한
+FLAG | 비정상여부
+PRIORITY | 우선순위
+COMMENTS | 비고
+
+DATETIMEEVENTS
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+STAY_ID | 스테이ID
+CHARTTIME | 기록시각
+STORETIME | 저장시각
+ITEMID | 항목ID
+VALUE | 값
+VALUEUOM | 단위
+WARNING | 경고
+
+OUTPUTEVENTS
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+STAY_ID | 스테이ID
+CHARTTIME | 기록시각
+STORETIME | 저장시각
+ITEMID | 항목ID
+VALUE | 값
+VALUEUOM | 단위
+
+D_ITEMS
+ITEMID | 항목ID
+LABEL | 항목명
+ABBREVIATION | 약어
+LINKSTO | 연결테이블
+CATEGORY | 카테고리
+UNITNAME | 단위명
+PARAM_TYPE | 파라미터유형
+LOWNORMALVALUE | 하한값
+HIGHNORMALVALUE | 상한값
+
+D_LABITEMS
+ITEMID | 검사ID
+LABEL | 검사명
+FLUID | 검사체액
+CATEGORY | 검사카테고리
+
+MICROBIOLOGYEVENTS
+MICROEVENT_ID | 미생물검사ID
+SUBJECT_ID | 환자ID
+HADM_ID | 입원ID
+MICRO_SPECIMEN_ID | 미생물검체ID
+CHARTDATE | 검사일자
+CHARTTIME | 검사시각
+SPEC_ITEMID | 검체항목ID
+SPEC_TYPE_DESC | 검체종류
+TEST_SEQ | 검사순번
+STORETIME | 저장시각
+TEST_ITEMID | 검사항목ID
+TEST_NAME | 검사이름
+ORG_ITEMID | 미생물항목ID
+ORG_NAME | 미생물이름
+ISOLATE_NUM | 동정횟수
+QUANTITY | 양
+AB_ITEMID | 항생제항목ID
+AB_NAME | 항생제이름
+DILUTION_TEXT | 희석텍스트
+DILUTION_COMPARISON | 희석비교
+DILUTION_VALUE | 희석값
+INTERPRETATION | 결과판독
+COMMENTS | 비고
+
+OMR
+SUBJECT_ID | 환자ID
+CHARTDATE | 기록일
+RESULT_NAME | 결과명
+SEQ_NUM | 순번
+RESULT_VALUE | 결과값
+
+# [FAQ]
+Q: Hb 평균 수치가 10 이하인 환자ID 뽑아줘
+A: SELECT subject_id FROM (SELECT l.subject_id, AVG(l.valuenum) AS mean_hb FROM labevents l JOIN d_labitems d ON l.itemid = d.itemid WHERE d.label = 'Hemoglobin' GROUP BY l.subject_id) WHERE mean_hb <= 10
+
+Q: 혈압(Blood Pressure) 140 초과 환자 명단
+A: SELECT DISTINCT c.subject_id FROM chartevents c JOIN d_items d ON c.itemid = d.itemid WHERE d.label='Blood Pressure' AND c.valuenum > 140
+
+Q: WBC, Hb, Glucose 각각 평균값 알려줘
+A: SELECT (SELECT AVG(l.valuenum) FROM labevents l JOIN d_labitems d ON l.itemid = d.itemid WHERE d.label = 'White Blood Cell Count') AS avg_wbc, (SELECT AVG(l.valuenum) FROM labevents l JOIN d_labitems d ON l.itemid = d.itemid WHERE d.label = 'Hemoglobin') AS avg_hb, (SELECT AVG(l.valuenum) FROM labevents l JOIN d_labitems d ON l.itemid = d.itemid WHERE d.label = 'Glucose') AS avg_glu FROM dual
+
+# [유의어]
+"혈압", "BP" → d_items.label='Blood Pressure'
+"맥박", "HR" → d_items.label='Heart Rate'
+"혈당", "glucose" → d_labitems.label='Glucose'
+"Hb", "혈색소" → d_labitems.label='Hemoglobin'
+"WBC", "백혈구" → d_labitems.label='White Blood Cell Count'
+
+# [활용팁]
+valuenum: 수치값 필터/통계/그래프
+charttime: 시계열 분석, 최근값 구할 때
+label: 항목명, 자연어/약어 매핑
