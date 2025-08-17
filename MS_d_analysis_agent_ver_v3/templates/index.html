@@ -341,7 +341,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script>
-        // 👈 [수정] 전역 변수 추가
+        //전역 변수 추가
         let pollingInterval = null;
 
         let uploadedData = null;
@@ -485,7 +485,7 @@
             `).join('');
         }
 
-        // 👈 [수정] executeAnalysis 함수 수정
+        //executeAnalysis 함수 수정
         function executeAnalysis() {
             const apiKey = document.getElementById('apiKey').value;
             if (!apiKey) {
@@ -542,7 +542,7 @@
             });
         }
 
-        // 👈 [수정] 상태 폴링 함수 추가
+        //상태 폴링 함수 추가
         function pollTaskStatus(taskId) {
             pollingInterval = setInterval(() => {
                 fetch(`/get_task_status/${taskId}`)
@@ -572,7 +572,7 @@
             }, 3000); // 3초마다 상태 확인
         }
 
-        // 👈 [수정] 분석 오류 표시 함수 추가
+        // 분석 오류 표시 함수 추가
         function showAnalysisError(message) {
              document.getElementById('analysisResults').innerHTML = `
                 <div class="text-center text-danger">
